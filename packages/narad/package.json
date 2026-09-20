@@ -2,7 +2,7 @@
   "name": "@devkrity/narad",
   "version": "0.1.0-alpha.1",
   "description": "Framework-neutral Narad client: reducer, replay, transport, and targeted execution.",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "type": "module",
   "sideEffects": false,
   "releaseStatus": "alpha",
@@ -30,6 +30,7 @@
     "README.md"
   ],
   "scripts": {
+    "prepare": "tsup",
     "build": "tsup",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
@@ -39,6 +40,7 @@
     "fast-json-patch": "^3.1.1"
   },
   "devDependencies": {
+    "@devkrity/narad-spec": "workspace:*",
     "@types/node": "^22.15.0",
     "@typescript/native": "npm:typescript@^7.0.2",
     "tsup": "^8.5.0",

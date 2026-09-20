@@ -1,0 +1,29 @@
+{
+  "name": "@devkrity/narad-spec",
+  "version": "0.1.0-alpha.1",
+  "description": "Narad protocol spec: JSON Schema, conformance traces, and prose.",
+  "license": "AGPL-3.0-or-later",
+  "type": "module",
+  "files": [
+    "schema",
+    "conformance",
+    "narad-v1.md",
+    "README.md"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    "./schema/*": "./schema/*",
+    "./conformance/*": "./conformance/*",
+    "./narad-v1.md": "./narad-v1.md"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shukla-amit/narad",
+    "directory": "packages/narad-spec"
+  },
+  "keywords": [
+    "narad",
+    "protocol",
+    "spec"
+  ]
+}

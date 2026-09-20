@@ -3,12 +3,12 @@
 **Status:** 1.0 Release Candidate 1  
 **Protocol id:** `narad/v1`  
 **Wire naming:** `dotted.lowercase`  
-**Normative schemas:** [`narad/schema`](narad/schema/)  
-**Conformance traces:** [`narad/conformance`](narad/conformance/)
+**Normative schemas:** [`schema/`](./schema/)  
+**Conformance traces:** [`conformance/`](./conformance/)
 
 Narad is a transport-neutral protocol for durable agent sessions, runs, workflows, tools, interrupts, conversation, replay, and client execution. It defines observable facts and reducer behavior. It does not prescribe scheduler internals, model providers, storage engines, HTTP routes, or UI frameworks.
 
-This document is normative. Design rationale is separate in [Narad rationale](agent-interaction-protocol-rationale.md). Product-specific adoption belongs in an implementation guide such as [Kautuka Narad adoption](agent-interaction-protocol-kautuka-adoption.md).
+This document is normative. Product-specific adoption belongs in the consuming application, not in this package.
 
 ---
 
@@ -470,7 +470,7 @@ Events are applied once by canonical event identity and in authority sequence or
 
 #### Reasoning
 
-`reasoning.started`, `reasoning.delta`, and `reasoning.completed` use a required `reasoningId`. They may include `messageId` for correlation. Kautuka emits `reasoningId` as `reasoning:{assistantMessageId}` so clients can join reasoning to the parent assistant message. Approval resume may open a later assistant `messageId` (new delivery attempt); transcript UIs **MUST** keep earlier reasoning for the same turn rather than dropping it when the final text lands on the later id. Reasoning content is display-sensitive and may be omitted from a principal’s conversation projection, but its omission **MUST NOT** alter backend execution authority.
+`reasoning.started`, `reasoning.delta`, and `reasoning.completed` use a required `reasoningId`. They may include `messageId` for correlation. A host MAY emit `reasoningId` as `reasoning:{assistantMessageId}` so clients can join reasoning to the parent assistant message. Approval resume may open a later assistant `messageId` (new delivery attempt); transcript UIs **MUST** keep earlier reasoning for the same turn rather than dropping it when the final text lands on the later id. Reasoning content is display-sensitive and may be omitted from a principal’s conversation projection, but its omission **MUST NOT** alter backend execution authority.
 
 #### Transcript visibility
 

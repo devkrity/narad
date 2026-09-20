@@ -12,4 +12,4 @@ Framework-neutral Narad client for deterministic authority reduction, replay, SS
 - `createCommandClient` — POSTs spec-shaped `resolve-interrupt` (never synthesizes authority)
 - `validateWireRecord` — strict fail-closed wire validation with profile allowlisting
 
-Conformance traces under `spec/conformance` are consumed by package tests.
+Conformance traces are in `@devkrity/narad-spec` and consumed by package tests.

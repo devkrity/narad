@@ -1,6 +1,29 @@
 {
-  "name": "devkrity-narad",
+  "name": "narad",
   "private": true,
   "packageManager": "pnpm@11.5.2",
-  "description": "Derived export of Narad spec + TS client. Kautuka is the source until first publish. Do not hand-edit."
+  "license": "AGPL-3.0-or-later",
+  "description": "Narad: replayable agent interaction protocol. Spec, TypeScript client, and React bindings.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shukla-amit/narad.git"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=11.5.2"
+  },
+  "scripts": {
+    "build": "pnpm --filter \"./packages/narad\" --filter \"./packages/narad-react\" build",
+    "typecheck": "pnpm --filter \"./packages/narad\" --filter \"./packages/narad-react\" typecheck",
+    "test": "pnpm --filter \"./packages/narad\" --filter \"./packages/narad-react\" test:run",
+    "spec:check": "node ./scripts/validate-spec.mjs",
+    "smoke": "node ./scripts/smoke-public-exports.mjs",
+    "typecheck:smoke": "pnpm --filter @devkrity/narad exec tsc --project ../../smoke/tsconfig.json",
+    "verify": "pnpm spec:check && pnpm build && pnpm typecheck && pnpm test && pnpm typecheck:smoke && pnpm smoke"
+  },
+  "devDependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "typescript": "npm:@typescript/typescript6@^6.0.2"
+  }
 }

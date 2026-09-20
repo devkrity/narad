@@ -3,7 +3,14 @@ import { createNaradClientStore, createNaradReducer, createAttachCoordinator, cr
 import { NARAD_PROFILE_IDS } from './types.js';
 import { canonicalEventFingerprint } from './reducer/dedup.js';
 import { classifyWireRecord } from './wire.js';
-import { loadInvalidConformanceTraces, loadPositiveConformanceTraces } from './test/fixtures/conformanceTraces.js';
+import {
+  INVALID_CONFORMANCE_TRACES,
+  POSITIVE_CONFORMANCE_TRACES,
+  SPEC_ONLY_INVALID_TRACES,
+  listConformanceTraces,
+  loadInvalidConformanceTraces,
+  loadPositiveConformanceTraces,
+} from './test/fixtures/conformanceTraces.js';
 
 const ALL_PROFILES = Object.values(NARAD_PROFILE_IDS);
 
@@ -505,6 +512,17 @@ describe('review regression fixes', () => {
     expect(snapshot.lastSessionSequence).toBe(6);
     expect([...snapshot.interrupts.values()].filter((item) => item.open)).toHaveLength(1);
     expect(snapshot.runs.get('run-6')?.state).toBe('paused');
+  });
+});
+
+describe('conformance fixture lists', () => {
+  it('match every jsonl in @devkrity/narad-spec', () => {
+    const listed = [
+      ...POSITIVE_CONFORMANCE_TRACES,
+      ...INVALID_CONFORMANCE_TRACES,
+      ...SPEC_ONLY_INVALID_TRACES,
+    ].sort();
+    expect(listed).toEqual([...listConformanceTraces()].sort());
   });
 });
 

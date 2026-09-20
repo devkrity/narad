@@ -1,10 +1,9 @@
 import { readFileSync, readdirSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-const packageRoot = dirname(dirname(dirname(dirname(fileURLToPath(import.meta.url)))));
-const repoRoot = join(packageRoot, '../..');
-export const CONFORMANCE_DIR = join(repoRoot, 'spec/conformance');
+const require = createRequire(import.meta.url);
+export const CONFORMANCE_DIR = join(dirname(require.resolve('@devkrity/narad-spec/package.json')), 'conformance');
 
 export const POSITIVE_CONFORMANCE_TRACES = [
   'authority-replay.jsonl',
@@ -30,6 +29,11 @@ export const INVALID_CONFORMANCE_TRACES = [
   'progress-after-terminal.invalid.jsonl',
   'progress-before-run.invalid.jsonl',
   'progress-interrupt-adjacency.invalid.jsonl',
+] as const;
+
+/** Spec-invalid traces `pnpm spec:check` rejects. The headless reducer does not yet fail closed on these. */
+export const SPEC_ONLY_INVALID_TRACES = [
+  'graph-cursor-ahead.invalid.jsonl',
 ] as const;
 
 export function readConformanceTrace(name: string): string[] {
