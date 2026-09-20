@@ -1,0 +1,4 @@
+{"type":"workflow.started","protocolVersion":"narad/v1","eventId":"evt-1","timestamp":"2026-08-05T00:00:00Z","sessionId":"session-4","sessionSequence":1,"workflowId":"workflow-1","workflowSequence":1,"defaultClientExecutorId":"desktop-1"}
+{"type":"run.started","protocolVersion":"narad/v1","eventId":"evt-2","timestamp":"2026-08-05T00:00:01Z","sessionId":"session-4","sessionSequence":2,"workflowId":"workflow-1","workflowSequence":2,"rootRunId":"run-4","runId":"run-4","sequence":1,"clientExecutorId":"desktop-1"}
+{"type":"run.finished","protocolVersion":"narad/v1","eventId":"evt-3","timestamp":"2026-08-05T00:00:02Z","sessionId":"session-4","sessionSequence":3,"workflowId":"workflow-1","workflowSequence":3,"rootRunId":"run-4","runId":"run-4","sequence":2}
+{"type":"workflow.finished","protocolVersion":"narad/v1","eventId":"evt-4","timestamp":"2026-08-05T00:00:03Z","sessionId":"session-4","sessionSequence":4,"workflowId":"workflow-1","workflowSequence":4}

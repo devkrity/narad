@@ -1,0 +1,1 @@
+{"type":"graph.snapshot","protocolVersion":"narad/v1","timestamp":"2026-08-05T00:00:00Z","sessionId":"session-bad","scope":"run","rootRunId":"run-missing","graphSchemaVersion":"narad.graph/v1","revision":1,"sourceRunCursor":{"sequence":1},"rootNodeId":"node-root","nodes":[],"edges":[]}

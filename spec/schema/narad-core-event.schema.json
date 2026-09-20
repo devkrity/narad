@@ -1,0 +1,267 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narad.dev/schema/v1/core-event.json",
+  "title": "Narad v1 core authority or watch event",
+  "oneOf": [
+    { "$ref": "#/$defs/runStarted" },
+    { "$ref": "#/$defs/runPaused" },
+    { "$ref": "#/$defs/runResumed" },
+    { "$ref": "#/$defs/runStopRequested" },
+    { "$ref": "#/$defs/runFinished" },
+    { "$ref": "#/$defs/runError" },
+    { "$ref": "#/$defs/runCancelled" },
+    { "$ref": "#/$defs/interruptRequested" },
+    { "$ref": "#/$defs/interruptResolved" },
+    { "$ref": "#/$defs/toolCallStarted" },
+    { "$ref": "#/$defs/toolCallFinished" },
+    { "$ref": "#/$defs/sessionRevision" },
+    { "$ref": "#/$defs/runRevision" }
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": ["type", "protocolVersion", "eventId", "timestamp"],
+      "properties": {
+        "type": { "type": "string", "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$" },
+        "protocolVersion": { "const": "narad/v1" },
+        "eventId": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "sessionAuthority": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["sessionId", "sessionSequence"],
+          "properties": {
+            "sessionId": { "type": "string", "minLength": 1 },
+            "sessionSequence": { "type": "integer", "minimum": 1 },
+            "workflowId": { "type": "string", "minLength": 1 },
+            "workflowSequence": { "type": "integer", "minimum": 1 }
+          },
+          "dependentRequired": {
+            "workflowId": ["workflowSequence"],
+            "workflowSequence": ["workflowId"]
+          }
+        }
+      ]
+    },
+    "runAuthority": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["rootRunId", "runId", "sequence"],
+          "properties": {
+            "rootRunId": { "type": "string", "minLength": 1 },
+            "runId": { "type": "string", "minLength": 1 },
+            "sequence": { "type": "integer", "minimum": 1 },
+            "parentRunId": { "type": "string", "minLength": 1 },
+            "parentToolCallId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "runStarted": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "properties": {
+            "type": { "const": "run.started" },
+            "clientExecutorId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "runPaused": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["waitId", "reason", "resumeMode"],
+          "properties": {
+            "type": { "const": "run.paused" },
+            "waitId": { "type": "string", "minLength": 1 },
+            "reason": { "type": "string", "minLength": 1 },
+            "resumeMode": { "enum": ["automatic", "command"] },
+            "interruptId": { "type": "string", "minLength": 1 },
+            "retryAt": { "type": "string", "format": "date-time" },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "runResumed": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["waitId"],
+          "properties": {
+            "type": { "const": "run.resumed" },
+            "waitId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "runStopRequested": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["targetRunId"],
+          "properties": {
+            "type": { "const": "run.stop.requested" },
+            "targetRunId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "runUsage": {
+      "type": "object",
+      "properties": {
+        "promptTokens": { "type": "integer", "minimum": 0 },
+        "completionTokens": { "type": "integer", "minimum": 0 },
+        "totalTokens": { "type": "integer", "minimum": 0 }
+      },
+      "additionalProperties": true
+    },
+    "runFinished": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "properties": {
+            "type": { "const": "run.finished" },
+            "artifactIds": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "uniqueItems": true
+            },
+            "usage": { "$ref": "#/$defs/runUsage" }
+          }
+        }
+      ]
+    },
+    "runError": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["code", "message"],
+          "properties": {
+            "type": { "const": "run.error" },
+            "code": { "type": "string", "minLength": 1 },
+            "message": { "type": "string" },
+            "usage": { "$ref": "#/$defs/runUsage" }
+          }
+        }
+      ]
+    },
+    "runCancelled": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "properties": {
+            "type": { "const": "run.cancelled" },
+            "code": { "type": "string" },
+            "message": { "type": "string" },
+            "usage": { "$ref": "#/$defs/runUsage" }
+          }
+        }
+      ]
+    },
+    "interruptRequested": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["interruptId", "waitId", "kind", "actions"],
+          "properties": {
+            "type": { "const": "interrupt.requested" },
+            "interruptId": { "type": "string", "minLength": 1 },
+            "waitId": { "type": "string", "minLength": 1 },
+            "kind": { "type": "string", "minLength": 1 },
+            "actions": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            "expiresAt": { "type": "string", "format": "date-time" },
+            "title": { "type": "string" },
+            "message": { "type": "string" },
+            "input": {}
+          }
+        }
+      ]
+    },
+    "interruptResolved": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["interruptId", "waitId", "decision"],
+          "properties": {
+            "type": { "const": "interrupt.resolved" },
+            "interruptId": { "type": "string", "minLength": 1 },
+            "waitId": { "type": "string", "minLength": 1 },
+            "decision": { "type": "string", "minLength": 1 },
+            "reason": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "toolCallStarted": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["toolCallId", "toolName", "executor", "args"],
+          "properties": {
+            "type": { "const": "tool.call.started" },
+            "toolCallId": { "type": "string", "minLength": 1 },
+            "toolName": { "type": "string", "minLength": 1 },
+            "executor": { "enum": ["backend", "client"] },
+            "args": {}
+          }
+        }
+      ]
+    },
+    "toolCallFinished": {
+      "allOf": [
+        { "$ref": "#/$defs/runAuthority" },
+        {
+          "required": ["toolCallId", "outcome", "response"],
+          "properties": {
+            "type": { "const": "tool.call.finished" },
+            "toolCallId": { "type": "string", "minLength": 1 },
+            "outcome": { "enum": ["success", "error", "cancelled"] },
+            "response": {},
+            "code": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "sessionRevision": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["sessionId", "revision"],
+          "properties": {
+            "type": { "const": "session.revision" },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "revision": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "runRevision": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["sessionId", "rootRunId", "runId", "revision"],
+          "properties": {
+            "type": { "const": "run.revision" },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "rootRunId": { "type": "string", "minLength": 1 },
+            "runId": { "type": "string", "minLength": 1 },
+            "revision": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{"type":"workspace.revision","protocolVersion":"narad/v1","eventId":"evt-1","timestamp":"2026-08-05T00:00:00Z","workspaceId":"workspace-1","revision":1}
+{"type":"session.created","protocolVersion":"narad/v1","eventId":"evt-2","timestamp":"2026-08-05T00:00:01Z","workspaceId":"workspace-1","sessionId":"session-watch-a","revision":2}
+{"type":"session.updated","protocolVersion":"narad/v1","eventId":"evt-3","timestamp":"2026-08-05T00:00:02Z","workspaceId":"workspace-1","sessionId":"session-watch-a","revision":3}
+{"type":"session.created","protocolVersion":"narad/v1","eventId":"evt-4","timestamp":"2026-08-05T00:00:03Z","workspaceId":"workspace-1","sessionId":"session-watch-b","revision":4}
+{"type":"session.archived","protocolVersion":"narad/v1","eventId":"evt-5","timestamp":"2026-08-05T00:00:04Z","workspaceId":"workspace-1","sessionId":"session-watch-a","revision":5}

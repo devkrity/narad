@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narad.dev/schema/v1/control.json",
+  "title": "Narad v1 non-authority control message",
+  "oneOf": [
+    { "$ref": "#/$defs/clientAttached" },
+    { "$ref": "#/$defs/serverHeartbeat" },
+    { "$ref": "#/$defs/clientHeartbeat" },
+    { "$ref": "#/$defs/clientToolExecute" },
+    { "$ref": "#/$defs/clientToolFinish" }
+  ],
+  "$defs": {
+    "base": {
+      "type": "object",
+      "required": ["type", "protocolVersion"],
+      "properties": {
+        "type": { "type": "string" },
+        "protocolVersion": { "const": "narad/v1" }
+      },
+      "not": {
+        "anyOf": [
+          { "required": ["eventId"] },
+          { "required": ["sessionSequence"] },
+          { "required": ["workflowSequence"] },
+          { "required": ["sequence"] },
+          { "required": ["revision"] }
+        ]
+      }
+    },
+    "leasedClient": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["clientExecutorId", "leaseId"],
+          "properties": {
+            "clientExecutorId": { "type": "string", "minLength": 1 },
+            "leaseId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "clientAttached": {
+      "allOf": [
+        { "$ref": "#/$defs/leasedClient" },
+        {
+          "required": ["heartbeatIntervalMs", "leaseExpiresAt"],
+          "properties": {
+            "type": { "const": "client.attached" },
+            "heartbeatIntervalMs": { "type": "integer", "minimum": 1 },
+            "leaseExpiresAt": { "type": "string", "format": "date-time" }
+          }
+        }
+      ]
+    },
+    "serverHeartbeat": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "properties": {
+            "type": { "const": "server.heartbeat" },
+            "serverTime": { "type": "string", "format": "date-time" }
+          }
+        }
+      ]
+    },
+    "clientHeartbeat": {
+      "allOf": [
+        { "$ref": "#/$defs/leasedClient" },
+        {
+          "properties": {
+            "type": { "const": "client.heartbeat" }
+          }
+        }
+      ]
+    },
+    "clientToolExecute": {
+      "allOf": [
+        { "$ref": "#/$defs/leasedClient" },
+        {
+          "required": ["executionToken", "executionTokenExpiresAt", "toolCallId", "toolName", "args"],
+          "properties": {
+            "type": { "const": "client.tool.execute" },
+            "executionToken": { "type": "string", "minLength": 1 },
+            "executionTokenExpiresAt": { "type": "string", "format": "date-time" },
+            "toolCallId": { "type": "string", "minLength": 1 },
+            "toolName": { "type": "string", "minLength": 1 },
+            "args": {}
+          }
+        }
+      ]
+    },
+    "clientToolFinish": {
+      "allOf": [
+        { "$ref": "#/$defs/leasedClient" },
+        {
+          "required": ["executionToken", "toolCallId", "outcome", "response"],
+          "properties": {
+            "type": { "const": "client.tool.finish" },
+            "executionToken": { "type": "string", "minLength": 1 },
+            "toolCallId": { "type": "string", "minLength": 1 },
+            "outcome": { "enum": ["success", "error", "cancelled"] },
+            "response": {}
+          }
+        }
+      ]
+    }
+  }
+}

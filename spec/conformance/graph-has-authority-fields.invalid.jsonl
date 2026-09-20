@@ -1,0 +1,2 @@
+{"type":"run.started","protocolVersion":"narad/v1","eventId":"evt-1","timestamp":"2026-08-05T00:00:00Z","sessionId":"session-bad","sessionSequence":1,"rootRunId":"run-bad","runId":"run-bad","sequence":1}
+{"type":"graph.snapshot","protocolVersion":"narad/v1","timestamp":"2026-08-05T00:00:01Z","sessionId":"session-bad","sessionSequence":2,"scope":"run","rootRunId":"run-bad","graphSchemaVersion":"narad.graph/v1","revision":1,"sourceRunCursor":{"sequence":1},"rootNodeId":"node-root","nodes":[],"edges":[]}

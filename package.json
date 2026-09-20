@@ -1,0 +1,6 @@
+{
+  "name": "devkrity-narad",
+  "private": true,
+  "packageManager": "pnpm@11.5.2",
+  "description": "Derived export of Narad spec + TS client. Kautuka is the source until first publish. Do not hand-edit."
+}

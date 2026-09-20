@@ -1,0 +1,1 @@
+{"type":"progress.recorded","protocolVersion":"narad/v1","eventId":"evt-1","timestamp":"2026-08-05T00:00:00Z","sessionId":"session-bad","sessionSequence":1,"rootRunId":"run-bad","runId":"run-bad","sequence":1,"progressId":"phase-early","category":"phase","label":"Too early","status":"active","privacy":"public"}

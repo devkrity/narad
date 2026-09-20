@@ -1,0 +1,509 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narad.dev/schema/v1/profile-event.json",
+  "title": "Narad v1 optional profile event",
+  "oneOf": [
+    { "$ref": "#/$defs/workflowLifecycle" },
+    { "$ref": "#/$defs/messageUserRecorded" },
+    { "$ref": "#/$defs/messageTextStarted" },
+    { "$ref": "#/$defs/messageTextDelta" },
+    { "$ref": "#/$defs/messageTextCompleted" },
+    { "$ref": "#/$defs/reasoningStarted" },
+    { "$ref": "#/$defs/reasoningDelta" },
+    { "$ref": "#/$defs/reasoningCompleted" },
+    { "$ref": "#/$defs/messageRedacted" },
+    { "$ref": "#/$defs/attachmentEvent" },
+    { "$ref": "#/$defs/artifactEvent" },
+    { "$ref": "#/$defs/stateSnapshot" },
+    { "$ref": "#/$defs/stateDelta" },
+    { "$ref": "#/$defs/stateCompacted" },
+    { "$ref": "#/$defs/uiStateSnapshot" },
+    { "$ref": "#/$defs/uiStateDelta" },
+    { "$ref": "#/$defs/viewEvent" },
+    { "$ref": "#/$defs/progressRecorded" },
+    { "$ref": "#/$defs/profileRevision" },
+    { "$ref": "#/$defs/workspaceSessionEvent" },
+    { "$ref": "#/$defs/customEvent" },
+    { "$ref": "#/$defs/rawEvent" },
+    { "$ref": "#/$defs/traceEvent" },
+    { "$ref": "#/$defs/debugEvent" }
+  ],
+  "$defs": {
+    "jsonPatch": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["op", "path"],
+        "properties": {
+          "op": { "enum": ["add", "remove", "replace", "move", "copy", "test"] },
+          "path": { "type": "string", "pattern": "^(/([^/~]|~0|~1)*)*$" },
+          "from": { "type": "string", "pattern": "^(/([^/~]|~0|~1)*)*$" },
+          "value": {}
+        }
+      }
+    },
+    "base": {
+      "type": "object",
+      "required": ["type", "protocolVersion", "eventId", "timestamp"],
+      "properties": {
+        "type": { "type": "string", "pattern": "^[a-z][a-z0-9]*(\\.[a-z][a-z0-9]*)+$" },
+        "protocolVersion": { "const": "narad/v1" },
+        "eventId": { "type": "string", "minLength": 1 },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "sessionAuthority": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["sessionId", "sessionSequence"],
+          "properties": {
+            "sessionId": { "type": "string", "minLength": 1 },
+            "sessionSequence": { "type": "integer", "minimum": 1 },
+            "workflowId": { "type": "string", "minLength": 1 },
+            "workflowSequence": { "type": "integer", "minimum": 1 },
+            "rootRunId": { "type": "string", "minLength": 1 },
+            "runId": { "type": "string", "minLength": 1 },
+            "sequence": { "type": "integer", "minimum": 1 },
+            "nodeId": { "type": "string", "minLength": 1 }
+          },
+          "dependentRequired": {
+            "workflowId": ["workflowSequence"],
+            "workflowSequence": ["workflowId"],
+            "runId": ["rootRunId", "sequence"],
+            "rootRunId": ["runId", "sequence"],
+            "sequence": ["rootRunId", "runId"]
+          }
+        }
+      ]
+    },
+    "workflowAuthority": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["workflowId", "workflowSequence"]
+        }
+      ]
+    },
+    "workflowLifecycle": {
+      "allOf": [
+        { "$ref": "#/$defs/workflowAuthority" },
+        {
+          "properties": {
+            "type": {
+              "enum": ["workflow.started", "workflow.finished", "workflow.error", "workflow.cancelled"]
+            },
+            "defaultClientExecutorId": { "type": "string", "minLength": 1 },
+            "code": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "messageScope": {
+      "required": ["messageScope"],
+      "properties": {
+        "messageScope": { "enum": ["session", "workflow", "run"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "messageScope": { "const": "workflow" } }, "required": ["messageScope"] },
+          "then": { "required": ["workflowId", "workflowSequence"] }
+        },
+        {
+          "if": { "properties": { "messageScope": { "const": "run" } }, "required": ["messageScope"] },
+          "then": { "required": ["rootRunId", "runId", "sequence"] }
+        }
+      ]
+    },
+    "stateScope": {
+      "required": ["scope"],
+      "properties": {
+        "scope": { "enum": ["session", "workflow", "run"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "scope": { "const": "workflow" } }, "required": ["scope"] },
+          "then": { "required": ["workflowId", "workflowSequence"] }
+        },
+        {
+          "if": { "properties": { "scope": { "const": "run" } }, "required": ["scope"] },
+          "then": { "required": ["rootRunId", "runId", "sequence"] }
+        }
+      ]
+    },
+    "messageUserRecorded": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/messageScope" },
+        {
+          "required": ["messageId", "content"],
+          "properties": {
+            "type": { "const": "message.user.recorded" },
+            "messageId": { "type": "string", "minLength": 1 },
+            "content": { "type": "string" },
+            "attachmentIds": { "type": "array", "items": { "type": "string", "minLength": 1 } }
+          }
+        }
+      ]
+    },
+    "messageTextStarted": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/messageScope" },
+        {
+          "required": ["messageId", "role"],
+          "properties": {
+            "type": { "const": "message.text.started" },
+            "messageId": { "type": "string", "minLength": 1 },
+            "role": { "enum": ["assistant", "system"] }
+          }
+        }
+      ]
+    },
+    "messageTextDelta": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["messageId", "delta"],
+          "properties": {
+            "type": { "const": "message.text.delta" },
+            "messageId": { "type": "string", "minLength": 1 },
+            "delta": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "messageTextCompleted": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["messageId"],
+          "properties": {
+            "type": { "const": "message.text.completed" },
+            "messageId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "reasoningBase": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["reasoningId"],
+          "properties": {
+            "reasoningId": { "type": "string", "minLength": 1 },
+            "messageId": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    },
+    "reasoningStarted": {
+      "allOf": [
+        { "$ref": "#/$defs/reasoningBase" },
+        { "properties": { "type": { "const": "reasoning.started" } } }
+      ]
+    },
+    "reasoningDelta": {
+      "allOf": [
+        { "$ref": "#/$defs/reasoningBase" },
+        {
+          "required": ["delta"],
+          "properties": {
+            "type": { "const": "reasoning.delta" },
+            "delta": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "reasoningCompleted": {
+      "allOf": [
+        { "$ref": "#/$defs/reasoningBase" },
+        { "properties": { "type": { "const": "reasoning.completed" } } }
+      ]
+    },
+    "messageRedacted": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["messageId", "reason", "displayReplacement"],
+          "properties": {
+            "type": { "const": "message.redacted" },
+            "messageId": { "type": "string", "minLength": 1 },
+            "reason": { "type": "string", "minLength": 1 },
+            "displayReplacement": { "type": ["string", "null"] }
+          }
+        }
+      ]
+    },
+    "attachmentEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["attachmentId"],
+          "properties": {
+            "type": {
+              "enum": ["attachment.added", "attachment.ready", "attachment.failed", "attachment.removed"]
+            },
+            "attachmentId": { "type": "string", "minLength": 1 },
+            "code": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "artifactEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["artifactId"],
+          "properties": {
+            "type": { "enum": ["artifact.added", "artifact.ready", "artifact.failed"] },
+            "artifactId": { "type": "string", "minLength": 1 },
+            "code": { "type": "string" },
+            "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "stateSnapshot": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/stateScope" },
+        {
+          "required": ["revision", "state"],
+          "properties": {
+            "type": { "const": "state.snapshot" },
+            "scope": { "enum": ["session", "workflow", "run"] },
+            "revision": { "type": "integer", "minimum": 1 },
+            "state": {}
+          }
+        }
+      ]
+    },
+    "stateDelta": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/stateScope" },
+        {
+          "required": ["baseRevision", "revision", "patch"],
+          "properties": {
+            "type": { "const": "state.delta" },
+            "scope": { "enum": ["session", "workflow", "run"] },
+            "baseRevision": { "type": "integer", "minimum": 0 },
+            "revision": { "type": "integer", "minimum": 1 },
+            "patch": { "$ref": "#/$defs/jsonPatch" }
+          }
+        }
+      ]
+    },
+    "stateCompacted": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/stateScope" },
+        {
+          "required": ["coversThroughSessionSequence", "snapshotRevision"],
+          "properties": {
+            "type": { "const": "state.compacted" },
+            "scope": { "enum": ["session", "workflow", "run"] },
+            "coversThroughSessionSequence": { "type": "integer", "minimum": 0 },
+            "snapshotRevision": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "uiStateSnapshot": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/stateScope" },
+        {
+          "required": ["revision", "state"],
+          "properties": {
+            "type": { "const": "ui.state.snapshot" },
+            "scope": { "enum": ["session", "workflow", "run"] },
+            "revision": { "type": "integer", "minimum": 1 },
+            "state": {}
+          }
+        }
+      ]
+    },
+    "uiStateDelta": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        { "$ref": "#/$defs/stateScope" },
+        {
+          "required": ["baseRevision", "revision", "patch"],
+          "properties": {
+            "type": { "const": "ui.state.delta" },
+            "scope": { "enum": ["session", "workflow", "run"] },
+            "baseRevision": { "type": "integer", "minimum": 0 },
+            "revision": { "type": "integer", "minimum": 1 },
+            "patch": { "$ref": "#/$defs/jsonPatch" }
+          }
+        }
+      ]
+    },
+    "viewEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["viewId"],
+          "properties": {
+            "type": { "enum": ["view.opened", "view.updated", "view.closed"] },
+            "viewId": { "type": "string", "minLength": 1 },
+            "operation": { "enum": ["replace", "patch"] },
+            "model": {},
+            "patch": { "$ref": "#/$defs/jsonPatch" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "type": { "const": "view.updated" } }, "required": ["type"] },
+              "then": { "required": ["operation"] }
+            }
+          ]
+        }
+      ]
+    },
+    "progressRecorded": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["rootRunId", "runId", "sequence", "progressId", "category", "label", "status", "privacy"],
+          "properties": {
+            "type": { "const": "progress.recorded" },
+            "progressId": { "type": "string", "minLength": 1 },
+            "category": { "type": "string", "minLength": 1 },
+            "label": { "type": "string", "minLength": 1 },
+            "detail": { "type": "string" },
+            "status": { "enum": ["active", "completed", "failed", "cancelled"] },
+            "privacy": { "enum": ["public", "internal", "sensitive"] }
+          }
+        }
+      ]
+    },
+    "profileRevision": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["sessionId", "workflowId", "revision"],
+          "properties": {
+            "type": { "enum": ["workflow.revision", "node.revision"] },
+            "revision": { "type": "integer", "minimum": 1 },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "workflowId": { "type": "string", "minLength": 1 },
+            "nodeId": { "type": "string", "minLength": 1 }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "type": { "const": "node.revision" } }, "required": ["type"] },
+              "then": { "required": ["nodeId"] }
+            }
+          ]
+        }
+      ]
+    },
+    "workspaceSessionEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/base" },
+        {
+          "required": ["workspaceId", "revision"],
+          "properties": {
+            "type": {
+              "enum": ["workspace.revision", "session.created", "session.updated", "session.archived"]
+            },
+            "workspaceId": { "type": "string", "minLength": 1 },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "revision": { "type": "integer", "minimum": 1 }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "type": { "enum": ["session.created", "session.updated", "session.archived"] }
+                },
+                "required": ["type"]
+              },
+              "then": { "required": ["sessionId"] }
+            }
+          ]
+        }
+      ]
+    },
+    "customEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["name", "value"],
+          "properties": {
+            "type": {
+              "enum": ["session.custom", "workflow.custom", "run.custom", "node.custom"]
+            },
+            "name": { "type": "string", "pattern": "^[a-z0-9]+(\\.[a-z0-9]+)+$" },
+            "value": {}
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "type": { "const": "workflow.custom" } }, "required": ["type"] },
+              "then": { "required": ["workflowId", "workflowSequence"] }
+            },
+            {
+              "if": { "properties": { "type": { "const": "run.custom" } }, "required": ["type"] },
+              "then": { "required": ["rootRunId", "runId", "sequence"] }
+            },
+            {
+              "if": { "properties": { "type": { "const": "node.custom" } }, "required": ["type"] },
+              "then": { "required": ["workflowId", "workflowSequence", "nodeId"] }
+            }
+          ]
+        }
+      ]
+    },
+    "rawEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "required": ["contentType", "payload"],
+          "properties": {
+            "type": { "enum": ["session.raw", "workflow.raw", "run.raw", "node.raw"] },
+            "contentType": { "type": "string", "minLength": 1 },
+            "payload": { "type": "string" }
+          },
+          "allOf": [
+            {
+              "if": { "properties": { "type": { "const": "workflow.raw" } }, "required": ["type"] },
+              "then": { "required": ["workflowId", "workflowSequence"] }
+            },
+            {
+              "if": { "properties": { "type": { "const": "run.raw" } }, "required": ["type"] },
+              "then": { "required": ["rootRunId", "runId", "sequence"] }
+            },
+            {
+              "if": { "properties": { "type": { "const": "node.raw" } }, "required": ["type"] },
+              "then": { "required": ["workflowId", "workflowSequence", "nodeId"] }
+            }
+          ]
+        }
+      ]
+    },
+    "traceEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "properties": {
+            "type": { "enum": ["trace.span.started", "trace.span.completed", "trace.event"] }
+          }
+        }
+      ]
+    },
+    "debugEvent": {
+      "allOf": [
+        { "$ref": "#/$defs/sessionAuthority" },
+        {
+          "properties": {
+            "type": { "enum": ["debug.log", "debug.snapshot"] }
+          }
+        }
+      ]
+    }
+  }
+}

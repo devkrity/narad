@@ -1,0 +1,48 @@
+{
+  "name": "@devkrity/narad",
+  "version": "0.1.0-alpha.1",
+  "description": "Framework-neutral Narad client: reducer, replay, transport, and targeted execution.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "releaseStatus": "alpha",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devkrity/narad",
+    "directory": "packages/narad"
+  },
+  "keywords": [
+    "narad",
+    "agent",
+    "protocol",
+    "headless"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "dependencies": {
+    "fast-json-patch": "^3.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "tsup": "^8.5.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vitest": "^5.0.0"
+  }
+}

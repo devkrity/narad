@@ -1,0 +1,4 @@
+{"type":"run.started","protocolVersion":"narad/v1","eventId":"evt-1","timestamp":"2026-08-05T00:00:00Z","sessionId":"session-replay","sessionSequence":1,"rootRunId":"run-replay","runId":"run-replay","sequence":1}
+{"type":"run.started","protocolVersion":"narad/v1","eventId":"evt-1","timestamp":"2026-08-05T00:00:00Z","sessionId":"session-replay","sessionSequence":1,"rootRunId":"run-replay","runId":"run-replay","sequence":1}
+{"type":"run.finished","protocolVersion":"narad/v1","eventId":"evt-2","timestamp":"2026-08-05T00:00:01Z","sessionId":"session-replay","sessionSequence":2,"rootRunId":"run-replay","runId":"run-replay","sequence":2}
+{"type":"run.finished","protocolVersion":"narad/v1","eventId":"evt-2","timestamp":"2026-08-05T00:00:01Z","sessionId":"session-replay","sessionSequence":2,"rootRunId":"run-replay","runId":"run-replay","sequence":2}

@@ -1,0 +1,57 @@
+{
+  "name": "@devkrity/narad-react",
+  "version": "0.1.0-alpha.1",
+  "description": "React bindings for @devkrity/narad — provider and useSyncExternalStore hooks only.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "releaseStatus": "alpha",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devkrity/narad",
+    "directory": "packages/narad-react"
+  },
+  "keywords": [
+    "narad",
+    "react",
+    "agent",
+    "protocol"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "peerDependencies": {
+    "@devkrity/narad": "workspace:*",
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@devkrity/narad": "workspace:*",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@typescript/native": "npm:typescript@^7.0.2",
+    "@vitejs/plugin-react": "^6.1.1",
+    "jsdom": "^30.0.1",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsup": "^8.5.0",
+    "typescript": "npm:@typescript/typescript6@^6.0.2",
+    "vitest": "^5.0.0"
+  }
+}

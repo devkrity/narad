@@ -1,0 +1,169 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://narad.dev/schema/v1/hydrate.json",
+  "title": "Narad v1 hydrate record",
+  "oneOf": [
+    { "$ref": "#/$defs/messagesSnapshot" },
+    { "$ref": "#/$defs/graphSnapshot" },
+    { "$ref": "#/$defs/graphDelta" }
+  ],
+  "$defs": {
+    "nonAuthorityEnvelope": {
+      "not": {
+        "anyOf": [
+          { "required": ["eventId"] },
+          { "required": ["sessionSequence"] },
+          { "required": ["workflowSequence"] },
+          { "required": ["sequence"] }
+        ]
+      }
+    },
+    "jsonPatch": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["op", "path"],
+        "properties": {
+          "op": { "enum": ["add", "remove", "replace", "move", "copy", "test"] },
+          "path": { "type": "string", "pattern": "^(/([^/~]|~0|~1)*)*$" },
+          "from": { "type": "string", "pattern": "^(/([^/~]|~0|~1)*)*$" },
+          "value": {}
+        }
+      }
+    },
+    "graphScope": {
+      "required": ["scope"],
+      "properties": {
+        "scope": { "enum": ["run", "workflow"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "scope": { "const": "run" } }, "required": ["scope"] },
+          "then": {
+            "required": ["rootRunId", "sourceRunCursor"],
+            "properties": {
+              "rootRunId": { "type": "string", "minLength": 1 },
+              "sourceRunCursor": {
+                "type": "object",
+                "required": ["sequence"],
+                "properties": {
+                  "rootRunId": { "type": "string", "minLength": 1 },
+                  "sequence": { "type": "integer", "minimum": 1 }
+                },
+                "additionalProperties": false
+              }
+            },
+            "not": { "required": ["workflowId"] }
+          }
+        },
+        {
+          "if": { "properties": { "scope": { "const": "workflow" } }, "required": ["scope"] },
+          "then": {
+            "required": ["workflowId", "sourceWorkflowCursor"],
+            "properties": {
+              "workflowId": { "type": "string", "minLength": 1 },
+              "sourceWorkflowCursor": {
+                "type": "object",
+                "required": ["sequence"],
+                "properties": {
+                  "workflowId": { "type": "string", "minLength": 1 },
+                  "sequence": { "type": "integer", "minimum": 1 }
+                },
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      ]
+    },
+    "messagesSnapshot": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "protocolVersion",
+            "timestamp",
+            "snapshotId",
+            "sessionId",
+            "coversThroughSessionSequence",
+            "messages"
+          ],
+          "properties": {
+            "type": { "const": "messages.snapshot" },
+            "protocolVersion": { "const": "narad/v1" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "snapshotId": { "type": "string", "minLength": 1 },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "coversThroughSessionSequence": { "type": "integer", "minimum": 0 },
+            "messages": { "type": "array" }
+          },
+          "not": { "required": ["revision"] }
+        },
+        { "$ref": "#/$defs/nonAuthorityEnvelope" }
+      ]
+    },
+    "graphSnapshot": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "protocolVersion",
+            "timestamp",
+            "sessionId",
+            "scope",
+            "graphSchemaVersion",
+            "revision",
+            "rootNodeId",
+            "nodes",
+            "edges"
+          ],
+          "properties": {
+            "type": { "const": "graph.snapshot" },
+            "protocolVersion": { "const": "narad/v1" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "graphSchemaVersion": { "type": "string", "minLength": 1 },
+            "revision": { "type": "integer", "minimum": 1 },
+            "rootNodeId": { "type": "string", "minLength": 1 },
+            "nodes": { "type": "array" },
+            "edges": { "type": "array" }
+          }
+        },
+        { "$ref": "#/$defs/nonAuthorityEnvelope" },
+        { "$ref": "#/$defs/graphScope" }
+      ]
+    },
+    "graphDelta": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "type",
+            "protocolVersion",
+            "timestamp",
+            "sessionId",
+            "scope",
+            "graphSchemaVersion",
+            "baseRevision",
+            "revision",
+            "patch"
+          ],
+          "properties": {
+            "type": { "const": "graph.delta" },
+            "protocolVersion": { "const": "narad/v1" },
+            "timestamp": { "type": "string", "format": "date-time" },
+            "sessionId": { "type": "string", "minLength": 1 },
+            "graphSchemaVersion": { "type": "string", "minLength": 1 },
+            "baseRevision": { "type": "integer", "minimum": 0 },
+            "revision": { "type": "integer", "minimum": 1 },
+            "patch": { "$ref": "#/$defs/jsonPatch" }
+          }
+        },
+        { "$ref": "#/$defs/nonAuthorityEnvelope" },
+        { "$ref": "#/$defs/graphScope" }
+      ]
+    }
+  }
+}
