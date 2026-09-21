@@ -149,7 +149,7 @@ pnpm verify
 
 ## Consume from this repo
 
-Packages are unpublished. Pin a git tag and a `path:` into the monorepo. `prepare` builds `dist/` on install. Private clones need a token with Contents:read on `shukla-amit/narad`. GitHub Actions' default `GITHUB_TOKEN` cannot clone a second private repo.
+Packages are unpublished. Pin a git tag and a `path:` into the public monorepo at [github.com/devkrity/narad](https://github.com/devkrity/narad). `prepare` builds `dist/` on install. No GitHub token is required.
 
 pnpm 11.5.2 will refuse the git `prepare` unless the consumer allowlists the packages (proven: `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`). Put this in the consumer `pnpm-workspace.yaml`:
 
@@ -165,9 +165,9 @@ Write the full specifier in `package.json`. `pnpm add` may drop `#tag&path:` fro
 ```json
 {
   "dependencies": {
-    "@devkrity/narad": "git+https://github.com/shukla-amit/narad.git#v0.1.0-alpha.1&path:packages/narad",
-    "@devkrity/narad-react": "git+https://github.com/shukla-amit/narad.git#v0.1.0-alpha.1&path:packages/narad-react",
-    "@devkrity/narad-spec": "git+https://github.com/shukla-amit/narad.git#v0.1.0-alpha.1&path:packages/narad-spec"
+    "@devkrity/narad": "git+https://github.com/devkrity/narad.git#v0.1.0-alpha.1&path:packages/narad",
+    "@devkrity/narad-react": "git+https://github.com/devkrity/narad.git#v0.1.0-alpha.1&path:packages/narad-react",
+    "@devkrity/narad-spec": "git+https://github.com/devkrity/narad.git#v0.1.0-alpha.1&path:packages/narad-spec"
   }
 }
 ```

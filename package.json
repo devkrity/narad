@@ -6,7 +6,7 @@
   "description": "Narad: replayable agent interaction protocol. Spec, TypeScript client, and React bindings.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shukla-amit/narad.git"
+    "url": "https://github.com/devkrity/narad.git"
   },
   "engines": {
     "node": ">=22",

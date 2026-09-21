@@ -8,7 +8,7 @@
   "releaseStatus": "alpha",
   "repository": {
     "type": "git",
-    "url": "https://github.com/shukla-amit/narad",
+    "url": "https://github.com/devkrity/narad",
     "directory": "packages/narad"
   },
   "keywords": [
