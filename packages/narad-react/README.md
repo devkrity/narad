@@ -2,13 +2,7 @@
 
 Minimal React bindings for [`@devkrity/narad`](../narad/README.md).
 
-This package does **not** create stores, attach sessions, or run transport. Pass an already-created `NaradClientStore` to `NaradProvider` and read state with `useSyncExternalStore`-based hooks.
-
-## Install
-
-```bash
-pnpm add @devkrity/narad-react @devkrity/narad react
-```
+Narad clients reduce an authority journal; they never append. This package does **not** create stores, attach sessions, or run transport. Pass an already-created `NaradClientStore` to `NaradProvider` and read state with `useSyncExternalStore`-based hooks. Packages are unpublished; pin from git as in the [repo README](../../README.md).
 
 ## Usage
 

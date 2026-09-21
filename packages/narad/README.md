@@ -2,9 +2,12 @@
 
 Framework-neutral Narad client for deterministic authority reduction, replay, SSE parsing, subscribe-before-backfill attachment, and targeted client-tool execution.
 
-## Public API
+Clients reduce an authority journal. They never append to it. User intent goes out as commands (`resolve-interrupt`); accepted effects come back as events. Packages are unpublished; pin from git as in the [repo README](../../README.md).
+
+## Main exports
 
 - `createNaradReducer` / `createNaradClientStore` — pure session reducer with immutable snapshots
+- `replayJsonlReducer` — apply a JSONL authority trace to a reducer
 - `createExternalStore` — framework-neutral subscribe/getSnapshot store
 - `createSseFrameParser` — incremental SSE frame parser with bounded frame size
 - `createAttachCoordinator` — subscribe-before-backfill merge coordinator
