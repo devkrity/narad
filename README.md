@@ -10,7 +10,7 @@ Wire id: `narad/v1`. Speak: *NAH-rud*. Spell **Narad**, never Narada.
 | [`@devkrity/narad`](packages/narad) | Headless reducer, replay, attach, command client |
 | [`@devkrity/narad-react`](packages/narad-react) | React provider and `useSyncExternalStore` hooks |
 
-Requires Node 22+ and pnpm 11.5.2. License: [AGPL-3.0-or-later](./LICENSE).
+Requires Node 22+ and pnpm 11.5.2. License: [MIT](./LICENSE).
 
 ```sh
 pnpm install

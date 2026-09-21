@@ -2,7 +2,7 @@
   "name": "@devkrity/narad",
   "version": "0.1.0-alpha.1",
   "description": "Framework-neutral Narad client: reducer, replay, transport, and targeted execution.",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "releaseStatus": "alpha",

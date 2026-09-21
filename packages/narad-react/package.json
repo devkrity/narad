@@ -2,7 +2,7 @@
   "name": "@devkrity/narad-react",
   "version": "0.1.0-alpha.1",
   "description": "React bindings for @devkrity/narad — provider and useSyncExternalStore hooks only.",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "type": "module",
   "sideEffects": false,
   "releaseStatus": "alpha",
