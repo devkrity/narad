@@ -1,0 +1,38 @@
+name: Publish npm packages
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Publish @devkrity/narad
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+
+      - name: Enable pnpm
+        run: corepack enable
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify
+        run: pnpm verify
+
+      # Auth is the GitHub OIDC token. Each package needs a trusted publisher
+      # on npm for this filename, with direct publish allowed. npm cannot
+      # attach that publisher until the package exists, so the first publish
+      # is a local login, not this job.
+      - name: Publish public packages
+        run: pnpm publish -r --access public --no-git-checks

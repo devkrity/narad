@@ -3,6 +3,9 @@
   "version": "0.1.0-alpha.1",
   "description": "Narad protocol spec: JSON Schema, conformance traces, and prose.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "files": [
     "schema",

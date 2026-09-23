@@ -3,6 +3,9 @@
   "version": "0.1.0-alpha.1",
   "description": "React bindings for @devkrity/narad — provider and useSyncExternalStore hooks only.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "releaseStatus": "alpha",

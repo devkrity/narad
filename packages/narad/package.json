@@ -3,6 +3,9 @@
   "version": "0.1.0-alpha.1",
   "description": "Framework-neutral Narad client: reducer, replay, transport, and targeted execution.",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "type": "module",
   "sideEffects": false,
   "releaseStatus": "alpha",
