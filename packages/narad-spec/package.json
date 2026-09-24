@@ -1,6 +1,6 @@
 {
   "name": "@devkrity/narad-spec",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "Narad protocol spec: JSON Schema, conformance traces, and prose.",
   "license": "MIT",
   "publishConfig": {

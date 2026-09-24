@@ -4,7 +4,7 @@ Narad is a journal protocol for agent sessions. The backend appends facts, clien
 
 Wire id: `narad/v1`. Speak: *NAH-rud*. Spell **Narad**, never Narada.
 
-`0.1.0-alpha.1`. Requires Node 22+ and pnpm 11.5.2. License: [MIT](./LICENSE).
+`0.1.0-alpha.2`. Requires Node 22+ and pnpm 11.5.2. License: [MIT](./LICENSE).
 
 ## What Narad is
 
@@ -176,7 +176,7 @@ After `@devkrity` is reserved on npm, the same versions publish as `@devkrity/na
 
 ## Status
 
-Packages are `0.1.0-alpha.1`. This repo does not ship a server SDK, a Python SDK, or an AG-UI adapter. The shipped command client covers `resolve-interrupt`; `message` and `stop-active-root` are host-defined bindings ([§2.2](packages/narad-spec/narad-v1.md#22-command-catalog)). Spec prose, schemas, and traces live in `@devkrity/narad-spec`; the TypeScript client and React bindings consume them.
+Packages are `0.1.0-alpha.2`. This repo does not ship a server SDK, a Python SDK, or an AG-UI adapter. The shipped command client covers `resolve-interrupt`; `message` and `stop-active-root` are host-defined bindings ([§2.2](packages/narad-spec/narad-v1.md#22-command-catalog)). Spec prose, schemas, and traces live in `@devkrity/narad-spec`; the TypeScript client and React bindings consume them.
 
 ## Host
 
