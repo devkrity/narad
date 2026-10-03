@@ -4,6 +4,7 @@
   "title": "Narad v1 optional profile event",
   "oneOf": [
     { "$ref": "#/$defs/workflowLifecycle" },
+    { "$ref": "#/$defs/workflowEdgeTaken" },
     { "$ref": "#/$defs/messageUserRecorded" },
     { "$ref": "#/$defs/messageTextStarted" },
     { "$ref": "#/$defs/messageTextDelta" },
@@ -96,6 +97,22 @@
             "defaultClientExecutorId": { "type": "string", "minLength": 1 },
             "code": { "type": "string" },
             "message": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "workflowEdgeTaken": {
+      "allOf": [
+        { "$ref": "#/$defs/workflowAuthority" },
+        {
+          "required": ["from", "to"],
+          "properties": {
+            "type": { "const": "workflow.edge.taken" },
+            "from": { "type": "string", "minLength": 1 },
+            "to": { "type": "string", "minLength": 1 },
+            "caseIndex": { "type": "integer", "minimum": 0 },
+            "pointer": { "type": "string" },
+            "op": { "type": "string", "minLength": 1 }
           }
         }
       ]

@@ -200,6 +200,19 @@ export function validateAuthoritySemantics(state: ReducerInternalState, event: R
       }
       break;
     }
+    case 'workflow.edge.taken': {
+      const workflow = state.workflows.get(String(event.workflowId));
+      if (!workflow) {
+        throw new NaradClientError('invalid_lifecycle', 'Referenced workflow has not started.');
+      }
+      if (workflow.state !== 'running') {
+        throw new NaradClientError('invalid_lifecycle', 'Workflow must be running to take a transition.');
+      }
+      if (workflow.currentNodeId !== undefined && workflow.currentNodeId !== String(event.from)) {
+        throw new NaradClientError('invalid_lifecycle', 'Transition source does not match the current node.');
+      }
+      break;
+    }
     default:
       if (runId && (type.startsWith('tool.') || type.startsWith('interrupt.'))) {
         requireRun(state, runId);

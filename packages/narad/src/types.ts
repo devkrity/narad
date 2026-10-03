@@ -110,6 +110,15 @@ export interface WorkflowStepSnapshot {
   readonly attempt?: number;
 }
 
+export interface WorkflowTransitionSnapshot {
+  readonly from: string;
+  readonly to: string;
+  readonly caseIndex?: number;
+  readonly pointer?: string;
+  readonly op?: string;
+  readonly workflowSequence: number;
+}
+
 export interface WorkflowSnapshot {
   readonly workflowId: string;
   readonly sessionId: string;
@@ -121,6 +130,7 @@ export interface WorkflowSnapshot {
   readonly openWaitId?: string;
   readonly openInterruptId?: string;
   readonly steps: ReadonlyMap<string, WorkflowStepSnapshot>;
+  readonly transitions: readonly WorkflowTransitionSnapshot[];
 }
 
 export interface ToolCallSnapshot {

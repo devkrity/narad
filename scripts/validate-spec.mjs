@@ -701,6 +701,10 @@ function validateWorkflowAuthority(record, at, workflows, sessionActive, fail) {
     fail(at, `${record.type} requires an active workflow.`);
     return;
   }
+  if (record.type === 'workflow.edge.taken') {
+    requireFields(record, ['from', 'to'], at, fail);
+    return;
+  }
   if (['workflow.finished', 'workflow.error', 'workflow.cancelled'].includes(record.type)) {
     if (workflow.openRuns.size > 0) fail(at, 'workflow terminal emitted with open runs.');
     workflow.state = record.type;

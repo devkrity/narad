@@ -272,6 +272,19 @@ Workflow lifecycle types are `workflow.started`, `workflow.finished`, `workflow.
 
 A workflow terminal **MUST NOT** be emitted while any run belonging to it is open. A workflow associated with a client executor may include `defaultClientExecutorId`, but each run **MUST** record its effective binding explicitly in `run.started`.
 
+### 6.6 `workflow.edge.taken`
+
+When an exclusive choice selects one outgoing path, the backend emits `workflow.edge.taken`. The event is workflow authority. It consumes one `workflowSequence`. The workflow state stays as it was: running, paused, or terminal.
+
+`workflow.edge.taken` requires:
+
+- `from`, the source node id;
+- `to`, the selected target node id.
+
+It may include `caseIndex`, a non-negative integer for the condition that matched. The path used when no condition matches uses the index after the last explicit condition. It may include `pointer`, the field that condition read; the default path uses an empty string. It may include `op`, the comparison that matched, or `default` when no condition matched.
+
+The compared value stays in workflow working data. Linear succession from one node to the next is `workflow.step.started` on the target. An exclusive choice also emits `workflow.edge.taken` for the selected path.
+
 ---
 
 ## 7. Core authority events
@@ -439,7 +452,7 @@ Ancestor watch events may be coalesced. The emitted revision and cursor **MUST**
 
 ### 9.1 Workflow profile
 
-Workflow events are defined in §6.5. Every event belonging to a workflow, including its run-tree events, carries `workflowSequence`.
+Workflow lifecycle events are defined in §6.5. A selected exclusive-choice path is `workflow.edge.taken` (§6.6). Every event belonging to a workflow, including its run-tree events, carries `workflowSequence`.
 
 ### 9.2 Conversation profile
 

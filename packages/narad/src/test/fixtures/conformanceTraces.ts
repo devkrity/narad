@@ -19,6 +19,7 @@ export const POSITIVE_CONFORMANCE_TRACES = [
   'snapshot-replay.jsonl',
   'terminal-usage.jsonl',
   'workflow.jsonl',
+  'workflow-edge.jsonl',
   'workspace-watch.jsonl',
 ] as const;
 
@@ -29,6 +30,7 @@ export const INVALID_CONFORMANCE_TRACES = [
   'progress-after-terminal.invalid.jsonl',
   'progress-before-run.invalid.jsonl',
   'progress-interrupt-adjacency.invalid.jsonl',
+  'workflow-edge-missing-from.invalid.jsonl',
 ] as const;
 
 /** Spec-invalid traces `pnpm spec:check` rejects. The headless reducer does not yet fail closed on these. */

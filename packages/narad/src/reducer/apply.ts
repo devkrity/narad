@@ -536,6 +536,7 @@ function applyWorkflowLifecycle(state: ReducerInternalState, event: Record<strin
     openWaitId: undefined,
     openInterruptId: undefined,
     steps: new Map(),
+    transitions: [],
   };
   if (type === 'workflow.started' || type === 'workflow.resumed') {
     state.workflows = cloneMapWithEntry(state.workflows, workflowId, {
@@ -583,6 +584,28 @@ function applyWorkflowLifecycle(state: ReducerInternalState, event: Record<strin
   }
 }
 
+function applyWorkflowEdgeTaken(state: ReducerInternalState, event: Record<string, unknown>): void {
+  const workflowId = String(event.workflowId);
+  const existing = state.workflows.get(workflowId);
+  if (!existing) {
+    throw new NaradClientError('invalid_lifecycle', 'Referenced workflow has not started.');
+  }
+  const transition = {
+    from: String(event.from),
+    to: String(event.to),
+    caseIndex: typeof event.caseIndex === 'number' ? event.caseIndex : undefined,
+    pointer: typeof event.pointer === 'string' ? event.pointer : undefined,
+    op: typeof event.op === 'string' ? event.op : undefined,
+    workflowSequence: Number(event.workflowSequence),
+  };
+  state.workflows = cloneMapWithEntry(state.workflows, workflowId, {
+    ...existing,
+    currentNodeId: transition.to,
+    lastWorkflowSequence: transition.workflowSequence,
+    transitions: [...existing.transitions, transition],
+  });
+}
+
 function applyWorkflowStep(state: ReducerInternalState, event: Record<string, unknown>): void {
   const workflowId = String(event.workflowId);
   const nodeId = String(event.nodeId);
@@ -594,6 +617,7 @@ function applyWorkflowStep(state: ReducerInternalState, event: Record<string, un
     stopRequested: false,
     lastWorkflowSequence: Number(event.workflowSequence),
     steps: new Map(),
+    transitions: [],
   };
   const status =
     type === 'workflow.step.started' ? 'running' : type === 'workflow.step.finished' ? 'finished' : 'failed';
@@ -897,6 +921,9 @@ function applyAuthorityMutation(state: ReducerInternalState, event: Record<strin
     case 'workflow.step.finished':
     case 'workflow.step.failed':
       applyWorkflowStep(state, event);
+      break;
+    case 'workflow.edge.taken':
+      applyWorkflowEdgeTaken(state, event);
       break;
     default:
       if (type.startsWith('message.') || type.startsWith('reasoning.')) {

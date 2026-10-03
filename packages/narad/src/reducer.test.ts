@@ -811,6 +811,174 @@ describe('createNaradReducer gaps and ordering', () => {
     expect(snapshot.workflows.get('wf-1')?.openWaitId).toBe('wait:wrev-1');
   });
 
+  it('records a taken choice without changing workflow state, then accepts the finish', () => {
+    const reducer = createNaradReducer({ sessionId: 'wf-1', activeProfiles: ALL_PROFILES });
+    const apply = (event: Record<string, unknown>) =>
+      reducer.apply({
+        protocolVersion: 'narad/v1',
+        sessionId: 'wf-1',
+        timestamp: '2026-08-05T00:00:00Z',
+        workflowId: 'wf-1',
+        ...event,
+      });
+    expect(apply({ type: 'workflow.started', eventId: 'e1', sessionSequence: 1, workflowSequence: 1 }).applied).toBe(true);
+    expect(
+      apply({
+        type: 'workflow.step.started',
+        eventId: 'e2',
+        sessionSequence: 2,
+        workflowSequence: 2,
+        nodeId: 'step-1',
+      }).applied,
+    ).toBe(true);
+    expect(
+      apply({
+        type: 'workflow.step.finished',
+        eventId: 'e3',
+        sessionSequence: 3,
+        workflowSequence: 3,
+        nodeId: 'step-1',
+      }).applied,
+    ).toBe(true);
+    expect(
+      apply({
+        type: 'interrupt.requested',
+        eventId: 'e4',
+        sessionSequence: 4,
+        workflowSequence: 4,
+        scope: 'workflow',
+        interruptId: 'wrev-1',
+        waitId: 'wait:wrev-1',
+        kind: 'workflow_review',
+        actions: ['approve', 'request_changes', 'stop_run'],
+      }).applied,
+    ).toBe(true);
+    expect(
+      apply({
+        type: 'workflow.paused',
+        eventId: 'e5',
+        sessionSequence: 5,
+        workflowSequence: 5,
+        waitId: 'wait:wrev-1',
+        interruptId: 'wrev-1',
+      }).applied,
+    ).toBe(true);
+    const whilePaused = apply({
+      type: 'workflow.edge.taken',
+      eventId: 'e-early',
+      sessionSequence: 6,
+      workflowSequence: 6,
+      from: 'step-1',
+      to: 'step-3',
+      caseIndex: 1,
+      pointer: '',
+      op: 'default',
+    });
+    expect(whilePaused.applied).toBe(false);
+    expect(reducer.getSnapshot().lastSessionSequence).toBe(5);
+    expect(
+      apply({
+        type: 'interrupt.resolved',
+        eventId: 'e6',
+        sessionSequence: 6,
+        workflowSequence: 6,
+        interruptId: 'wrev-1',
+        waitId: 'wait:wrev-1',
+        decision: 'approve',
+        scope: 'workflow',
+      }).applied,
+    ).toBe(true);
+    expect(
+      apply({
+        type: 'workflow.resumed',
+        eventId: 'e7',
+        sessionSequence: 7,
+        workflowSequence: 7,
+        waitId: 'wait:wrev-1',
+      }).applied,
+    ).toBe(true);
+    expect(
+      apply({
+        type: 'workflow.edge.taken',
+        eventId: 'e8',
+        sessionSequence: 8,
+        workflowSequence: 8,
+        from: 'step-1',
+        to: 'step-3',
+        caseIndex: 1,
+        pointer: '',
+        op: 'default',
+      }).applied,
+    ).toBe(true);
+    const afterChoice = reducer.getSnapshot().workflows.get('wf-1');
+    expect(afterChoice?.state).toBe('running');
+    expect(afterChoice?.currentNodeId).toBe('step-3');
+    expect(afterChoice?.transitions).toEqual([
+      {
+        from: 'step-1',
+        to: 'step-3',
+        caseIndex: 1,
+        pointer: '',
+        op: 'default',
+        workflowSequence: 8,
+      },
+    ]);
+    expect(
+      apply({
+        type: 'workflow.step.started',
+        eventId: 'e9',
+        sessionSequence: 9,
+        workflowSequence: 9,
+        nodeId: 'step-3',
+      }).applied,
+    ).toBe(true);
+    expect(
+      apply({
+        type: 'workflow.step.finished',
+        eventId: 'e10',
+        sessionSequence: 10,
+        workflowSequence: 10,
+        nodeId: 'step-3',
+      }).applied,
+    ).toBe(true);
+    expect(apply({ type: 'workflow.finished', eventId: 'e11', sessionSequence: 11, workflowSequence: 11 }).applied).toBe(true);
+    const finished = reducer.getSnapshot().workflows.get('wf-1');
+    expect(finished?.state).toBe('finished');
+    expect(finished?.lastWorkflowSequence).toBe(11);
+    expect(finished?.transitions).toHaveLength(1);
+    expect(reducer.getSnapshot().sessionGap).toBe(false);
+  });
+
+  it('rejects workflow.edge.taken without a source and does not advance the cursor', () => {
+    const reducer = createNaradReducer({ sessionId: 'wf-1', activeProfiles: ALL_PROFILES });
+    expect(
+      reducer.apply({
+        type: 'workflow.started',
+        protocolVersion: 'narad/v1',
+        eventId: 'e1',
+        timestamp: '2026-08-05T00:00:00Z',
+        sessionId: 'wf-1',
+        sessionSequence: 1,
+        workflowId: 'wf-1',
+        workflowSequence: 1,
+      }).applied,
+    ).toBe(true);
+    const rejected = reducer.apply({
+      type: 'workflow.edge.taken',
+      protocolVersion: 'narad/v1',
+      eventId: 'e2',
+      timestamp: '2026-08-05T00:00:01Z',
+      sessionId: 'wf-1',
+      sessionSequence: 2,
+      workflowId: 'wf-1',
+      workflowSequence: 2,
+      to: 'step-3',
+    });
+    expect(rejected.applied).toBe(false);
+    expect(reducer.getSnapshot().lastSessionSequence).toBe(1);
+    expect(reducer.getSnapshot().workflows.get('wf-1')?.transitions).toEqual([]);
+  });
+
   it('rejects interrupt.resolved when decision is not an advertised action', () => {
     const reducer = createNaradReducer({ sessionId: 's1', activeProfiles: ALL_PROFILES });
     expect(

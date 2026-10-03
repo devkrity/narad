@@ -24,6 +24,7 @@ const PROFILE_AUTHORITY_TYPES = new Set<string>([
   'workflow.step.started',
   'workflow.step.finished',
   'workflow.step.failed',
+  'workflow.edge.taken',
   'message.user.recorded',
   'message.text.started',
   'message.text.delta',
@@ -130,6 +131,19 @@ function validateProfileAuthorityShape(record: Record<string, unknown>): void {
       break;
     case 'workflow.resumed':
       requireNonEmptyString(record, 'waitId');
+      break;
+    case 'workflow.edge.taken':
+      requireNonEmptyString(record, 'from');
+      requireNonEmptyString(record, 'to');
+      if (record.caseIndex !== undefined) {
+        requireInteger(record, 'caseIndex');
+      }
+      if (record.pointer !== undefined && typeof record.pointer !== 'string') {
+        throw new NaradClientError('invalid_record', 'Missing or invalid field: pointer');
+      }
+      if (record.op !== undefined) {
+        requireNonEmptyString(record, 'op');
+      }
       break;
     case 'message.user.recorded':
       requireNonEmptyString(record, 'messageId');
