@@ -8,7 +8,7 @@ For tool approvals, Narad keeps the decision tied to the tool call it governs an
 
 Wire protocol: `narad/v1` · Say *NAH-rud* · Spell **Narad**, never Narada.
 
-Packages: `0.1.0-alpha.3` · Development: Node 22+ and pnpm 11.5.2 · MIT
+Next release: `0.1.0-alpha.4` · Development: Node 22+ and pnpm 11.5.2 · MIT
 
 [Read the product spec sheet](packages/narad-spec/SPEC-SHEET.md) · [Read the normative protocol](packages/narad-spec/narad-v1.md)
 
@@ -52,6 +52,26 @@ Human decisions are first-class lifecycle facts. One run may have one open block
 
 For the protocol-defined feature set, package boundaries, and implementation map, see the [spec sheet](packages/narad-spec/SPEC-SHEET.md).
 
+## What breaks without a durable journal
+
+**A refresh can lose the run.** A stream-only UI knows only the frames it happened to receive. Narad lets a client rebuild from the ordered journal, merge live delivery with history, and catch up after sequence gaps.
+
+**Replay can repeat side effects.** Narad treats history as observation: a recorded tool-call event does not execute a tool. Client-side execution requires a targeted control message with a lease and one-shot execution token, so recovery does not turn replay into permission to act again.
+
+## Where Narad fits
+
+[MCP](https://modelcontextprotocol.io/) connects agents with tools; [A2A](https://a2a-protocol.org/) supports agent-to-agent communication; [AG-UI](https://docs.ag-ui.com/introduction) streams agent activity to user interfaces. Narad complements these by defining the ordered, replayable lifecycle journal behind durable sessions: what ran, what paused for a human decision, what was delegated, and how work resumed. That journal can support multiple clients and UI surfaces over the lifetime of a run.
+
+## When Narad is useful
+
+Consider Narad when at least two of these are true:
+
+- A person may approve, reject, or stop an action with real consequences.
+- The UI can refresh, disconnect, or be opened from another device.
+- A run delegates work to nested agents or spans multiple workflow steps.
+- Client-side tools can cause side effects.
+- You need to inspect, replay, or recover a run after its original stream is gone.
+
 ## Packages
 
 | Package | Provides |
@@ -60,7 +80,7 @@ For the protocol-defined feature set, package boundaries, and implementation map
 | [`@devkrity/narad`](packages/narad) | Framework-neutral validation, reducers, replay, SSE parsing, attach/recovery coordination, commands, and client tool execution. |
 | [`@devkrity/narad-react`](packages/narad-react) | React provider and selector hooks over an existing Narad client store. |
 
-The packages are currently `0.1.0-alpha.3`. This repository provides the protocol contract and client-side libraries. A host supplies its durable journal and storage, authorization, transport endpoints, command handling, scheduler, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
+The package manifests target `0.1.0-alpha.4`. This repository provides the protocol contract and client-side libraries. A host supplies its durable journal and storage, authorization, transport endpoints, command handling, scheduler, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
 
 ## Get started
 

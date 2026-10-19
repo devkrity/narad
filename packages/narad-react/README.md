@@ -2,7 +2,13 @@
 
 Minimal React bindings for [`@devkrity/narad`](../narad/README.md).
 
-Narad clients reduce an authority journal; they never append. This package does **not** create stores, attach sessions, or run transport. Pass an already-created `NaradClientStore` to `NaradProvider` and read state with `useSyncExternalStore`-based hooks. Packages are unpublished; pin from git as in the [repo README](../../README.md).
+Build React experiences over durable, replayable Narad sessions with a provider and focused selectors.
+
+```sh
+npm i @devkrity/narad @devkrity/narad-react
+```
+
+Pass an existing `NaradClientStore` to `NaradProvider`; the host application owns session creation, transport, and journal writes. The hooks expose state reduced from the ordered authority journal, including nested runs, workflows, tool activity, and human decisions.
 
 ## Usage
 
