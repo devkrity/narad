@@ -17,9 +17,10 @@
     "typecheck": "pnpm --filter \"./packages/narad\" --filter \"./packages/narad-react\" typecheck",
     "test": "pnpm --filter \"./packages/narad\" --filter \"./packages/narad-react\" test:run",
     "spec:check": "node ./scripts/validate-spec.mjs",
+    "verify:readme": "node ./packages/narad/verify-readme-example.mjs",
     "smoke": "node ./scripts/smoke-public-exports.mjs",
     "typecheck:smoke": "pnpm --filter @devkrity/narad exec tsc --project ../../smoke/tsconfig.json",
-    "verify": "pnpm spec:check && pnpm build && pnpm typecheck && pnpm test && pnpm typecheck:smoke && pnpm smoke"
+    "verify": "pnpm spec:check && pnpm build && pnpm verify:readme && pnpm typecheck && pnpm test && pnpm typecheck:smoke && pnpm smoke"
   },
   "devDependencies": {
     "ajv": "^8.20.0",

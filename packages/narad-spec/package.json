@@ -2,6 +2,10 @@
   "name": "@devkrity/narad-spec",
   "version": "0.1.0-alpha.3",
   "description": "Narad protocol spec: JSON Schema, conformance traces, and prose.",
+  "homepage": "https://github.com/devkrity/narad#readme",
+  "bugs": {
+    "url": "https://github.com/devkrity/narad/issues"
+  },
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -10,11 +14,13 @@
   "files": [
     "schema",
     "conformance",
+    "SPEC-SHEET.md",
     "narad-v1.md",
     "README.md"
   ],
   "exports": {
     "./package.json": "./package.json",
+    "./SPEC-SHEET.md": "./SPEC-SHEET.md",
     "./schema/*": "./schema/*",
     "./conformance/*": "./conformance/*",
     "./narad-v1.md": "./narad-v1.md"
@@ -27,6 +33,11 @@
   "keywords": [
     "narad",
     "protocol",
-    "spec"
+    "spec",
+    "agents",
+    "journal",
+    "human-in-the-loop",
+    "approval",
+    "event-sourcing"
   ]
 }

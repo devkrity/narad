@@ -1,75 +1,76 @@
 # Narad
 
-Narad is a journal protocol for agent sessions. The backend appends facts, clients reduce them, and user intent goes back as commands.
+**Make agent work recoverable, inspectable, and safe to supervise.**
 
-Wire id: `narad/v1`. Speak: *NAH-rud*. Spell **Narad**, never Narada.
+Narad is a journal-first protocol and TypeScript client toolkit for durable agent sessions. It gives a host one ordered account of what happened across workflows, nested runs, tool calls, human decisions, conversation, and generated outputs. Clients can rebuild their view from that account after a refresh or disconnect, while the host remains in control of execution and durable writes.
 
-`0.1.0-alpha.3`. Requires Node 22+ and pnpm 11.5.2. License: [MIT](./LICENSE).
+For tool approvals, Narad keeps the decision tied to the tool call it governs and records the outcome in the journal, so replay shows what was approved and how the run continued.
 
-## What Narad is
+Wire protocol: `narad/v1` · Say *NAH-rud* · Spell **Narad**, never Narada.
 
-Narad is a transport-neutral protocol for durable agent sessions: runs, workflows, tool calls, interrupts, conversation, and client-side execution, recorded as an ordered journal of authority events that only the backend appends. A client never writes to that journal; it reduces it, and any client that replays the same journal from zero lands in the same state. Intent enters as commands (`message`, `resolve-interrupt`, `stop-active-root`) and the accepted effect comes back as an event.
+Packages: `0.1.0-alpha.3` · Development: Node 22+ and pnpm 11.5.2 · MIT
 
-Four kinds of wire data ([spec §2](packages/narad-spec/narad-v1.md#2-design-model)):
+[Read the product spec sheet](packages/narad-spec/SPEC-SHEET.md) · [Read the normative protocol](packages/narad-spec/narad-v1.md)
 
-- **Authority events** — immutable facts. They reconstruct session state.
-- **Watch events** — this scope changed; catch up. They do not replace history.
-- **Hydrate records** — derived projections (transcript, graph) anchored to an authority cursor.
-- **Control messages** — attach, heartbeat, and targeted client-tool execution. Not journal.
+## Agent work that survives real life
 
-Receiving an authority event does not trigger a client-side side effect.
+Agent work rarely happens in one uninterrupted stream. A workflow may delegate to another agent, pause while a person reviews a risky action, continue through a branch, or wait while a client-side tool is unavailable. The browser may close in the middle. Narad models these as durable lifecycle facts, so a client can reconnect and understand the same work rather than inventing a new state from whatever frames it happened to see.
 
 ```text
-Chat / Approvals UI
-        │  commands (resolve-interrupt, stop-active-root, message)
-        ▼
-Host accepts or rejects
-        │  append facts
-        ▼
-Authority journal
-        │  attach, history, live
-        ▼
-Stateless reducers  →  chat, interrupts, graph
+Workflow: prepare a release
+  ├─ Run: inspect changes
+  │    └─ Tool: delegate to security agent
+  │         └─ Nested run: review dependencies
+  │              └─ Approval requested → paused
+  ├─ Human decision: approve
+  ├─ Run resumes and completes
+  └─ Workflow records the selected next step
+
+Authority journal → replayable state → React UI, workspace view, or custom client
 ```
 
-## What breaks without it
+Narad keeps **what happened**, **what someone asked to happen**, and **what may execute on a client** as distinct things:
 
-**Reload loses the run.** A stream's client state is the frames it happened to receive. Narad delivers at least once, deduplicates on `(sessionId, eventId)`, and orders by contiguous `sessionSequence` ([§4](packages/narad-spec/narad-v1.md#4-identity-and-ordering), [§10](packages/narad-spec/narad-v1.md#10-replay-history-and-delivery)). The shipped coordinator subscribes, then backfills, so live and replay merge without a hole ([§10.3](packages/narad-spec/narad-v1.md#103-subscribe-before-replay)). Replay from zero is the normal path.
+- The backend appends authority events. Clients reduce and replay them; they never append facts to the journal.
+- Commands carry intent, such as resolving an interrupt. The host accepts or rejects that intent, and accepted outcomes appear in the journal.
+- Side-effecting client tools execute only from a targeted control message with a lease and execution token. Seeing a historical `tool.call.started` event never runs the tool.
 
-**Replay re-executes a tool.** If a client runs a side effect because it saw `tool.call.started`, a reconnect sends the work twice. Authority is observational. Execution happens only from a targeted `client.tool.execute` with a lease and a one-shot `executionToken` the client must record before acting ([§11.3](packages/narad-spec/narad-v1.md#113-targeted-tool-execution)). Duplicate delivery of an accepted token must not run again.
+## Capabilities
 
-Silence, a dropped socket, and a missed heartbeat are not terminals ([§6.3](packages/narad-spec/narad-v1.md#63-stop), [§11.2](packages/narad-spec/narad-v1.md#112-heartbeats)).
+| Capability | What it lets a host build |
+|---|---|
+| **Nested agent runs** | Connect child runs to their parent run and invoking tool call; follow delegated work under the same root execution. |
+| **Human decision points** | Pause a run or workflow for approval, input, or review; record the accepted decision and resume the matching wait cycle. |
+| **Workflow orchestration** | Record steps, run ownership, lifecycle, and selected branch transitions with their decision metadata. |
+| **Reconnect and replay** | Merge live delivery with history, detect sequence gaps, recover from the last cursor, and rebuild state deterministically. |
+| **Replay-safe client tools** | Route work to a bound client executor using leases and one-shot execution tokens instead of treating journal replay as permission to act. |
+| **Conversation and activity** | Reduce streamed messages and reasoning, progress, attachments, artifacts, and display redactions alongside run state. |
+| **Stateful experiences** | Synchronize scoped application state and UI views with revisioned snapshots and deltas. |
+| **Run and workspace views** | Build activity inspectors, workflow views, and workspace session lists from typed state and revision notifications. |
 
-## When you need it
+Human decisions are first-class lifecycle facts. One run may have one open blocking interrupt at a time; the resolution must match its open interrupt and advertised actions. Packed approval requests can also retain per-member decisions and an aggregate outcome.
 
-Use Narad when at least two of these are true:
-
-- a human can approve or stop something irreversible
-- the UI can refresh, duplicate, or go away for hours
-- a second client exists (phone, Slack, another tab)
-- a client-side tool has a real side effect
-- you must answer “what actually happened?” from history, not from whoever was connected
-
-If none of that is true, a streaming UI protocol is enough.
-
-## Where it sits
-
-[MCP](https://modelcontextprotocol.io/) is agent to tools. [A2A](https://a2a-protocol.org/) is agent to agent. [AG-UI](https://docs.ag-ui.com/introduction) is a runtime UI stream for drawing a turn. Narad is the ordered journal a UI, including an AG-UI client, can sit on. This repo does not ship an AG-UI adapter.
+For the protocol-defined feature set, package boundaries, and implementation map, see the [spec sheet](packages/narad-spec/SPEC-SHEET.md).
 
 ## Packages
 
-| Package | Role |
+| Package | Provides |
 |---|---|
-| [`@devkrity/narad-spec`](packages/narad-spec) | JSON Schema, conformance traces, prose |
-| [`@devkrity/narad`](packages/narad) | Headless reducer, replay, attach, command client |
-| [`@devkrity/narad-react`](packages/narad-react) | React provider and `useSyncExternalStore` hooks |
+| [`@devkrity/narad-spec`](packages/narad-spec) | `narad/v1` JSON Schemas, conformance traces, and normative protocol specification. |
+| [`@devkrity/narad`](packages/narad) | Framework-neutral validation, reducers, replay, SSE parsing, attach/recovery coordination, commands, and client tool execution. |
+| [`@devkrity/narad-react`](packages/narad-react) | React provider and selector hooks over an existing Narad client store. |
 
-## Getting started
+The packages are currently `0.1.0-alpha.3`. This repository provides the protocol contract and client-side libraries. A host supplies its durable journal and storage, authorization, transport endpoints, command handling, scheduler, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
 
-Replay a conformance trace. No host required.
+## Get started
+
+### Replay a trace
+
+Replay a published conformance trace with the same reducer a UI uses. No server is needed for this example.
 
 ```ts
 import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { createNaradClientStore, replayJsonlReducer } from '@devkrity/narad';
@@ -80,24 +81,31 @@ const lines = readFileSync(join(specRoot, 'conformance/interrupt-pause.jsonl'), 
 const store = createNaradClientStore({ sessionId: 'session-3' });
 const result = replayJsonlReducer(store, lines);
 const snapshot = store.getSnapshot();
-// result.applied === 6
-// snapshot.runs.get('run-3')?.state === 'finished'
+
+assert.equal(result.applied, 6);
+assert.equal(snapshot.runs.get('run-3')?.state, 'finished');
+console.log('Narad replay example passed.');
 ```
 
-That is the same reducer a UI uses.
+### Attach to a host
 
-Against a host you supply a `NaradTransport` (`attach`, `subscribeLive`, `fetchHistory`, `sendControl`, `dispose`). No server SDK ships in this repo. The shipped SSE helper is `createSseFrameParser`.
+Implement `NaradTransport` for your host’s attach, live subscription, history, and control endpoints. The coordinator handles profile negotiation, history backfill, buffered live events, and catch-up after a sequence gap.
 
 ```ts
-import { createAttachCoordinator, createCommandClient, createNaradClientStore } from '@devkrity/narad';
+import {
+  createAttachCoordinator,
+  createCommandClient,
+  createNaradClientStore,
+} from '@devkrity/narad';
 
 const store = createNaradClientStore({
   sessionId,
-  activeProfiles: ['narad.conversation/v1'],
+  activeProfiles: ['narad.workflow/v1', 'narad.conversation/v1'],
 });
+
 const coordinator = createAttachCoordinator(transport, store, {
   sessionId,
-  claimedProfiles: ['narad.conversation/v1'],
+  claimedProfiles: ['narad.workflow/v1', 'narad.conversation/v1'],
 });
 await coordinator.attach();
 
@@ -105,83 +113,50 @@ const commands = createCommandClient({ baseUrl: '/api/narad/v1', fetch });
 await commands.resolveInterrupt({ interruptId, decision: 'approve' });
 ```
 
-`NaradProvider` in `@devkrity/narad-react` reads an existing store. It does not attach, and it does not create one.
+The `@devkrity/narad-react` `NaradProvider` accepts an existing store. It does not create a store or attach a session; transport and session ownership stay with the host application.
 
-## The protocol in one page
+## Protocol model
 
-- **Commands in, events out.** User intent is `resolve-interrupt`, `stop-active-root`, or `message`. The host accepts or rejects before mutating durable state. Accepted effects appear as authority events ([§2.2](packages/narad-spec/narad-v1.md#22-command-catalog)). Clients never append.
-- **Ordering and identity.** Session, workflow, and run-tree sequences are strictly increasing and contiguous. Dedup key is `(sessionId, eventId)`. Timestamps are informational ([§4](packages/narad-spec/narad-v1.md#4-identity-and-ordering)). Delivery is at least once; reducers apply once.
-- **Interrupts and pause.** At most one open blocking interrupt per run. `interrupt.requested` is followed consecutively by pause with the same `waitId`. Resolution is a command. Expiry is `interrupt.resolved` with `decision=expired`, written by the backend ([§6](packages/narad-spec/narad-v1.md#6-run-and-workflow-state-machines), [§7.6](packages/narad-spec/narad-v1.md#76-interruptrequested)–[§7.7](packages/narad-spec/narad-v1.md#77-interruptresolved)).
-- **Client execution.** `tool.call.started` with `executor=client` is not permission to run. The bound executor receives `client.tool.execute` with `leaseId` and `executionToken` ([§11](packages/narad-spec/narad-v1.md#11-client-execution-and-heartbeat-control)).
-- **Profiles.** Servers advertise `activeProfiles` before sending profile events. Clients ignore unnegotiated profiles and fail closed on unknown types from a claimed profile ([§2.1](packages/narad-spec/narad-v1.md#21-protocol-profiles), [§13](packages/narad-spec/narad-v1.md#13-conformance)).
-- **Validation.** Unknown protocol versions are rejected. JSON Schema defines structure; golden traces define lifecycle and replay.
+Narad uses four kinds of wire data:
 
-An interrupt from the trace above, as the wire carries it:
+- **Authority events** are ordered, immutable facts from the host. They define lifecycle and conversation state.
+- **Watch events** announce that a scope changed and give the client a reason to catch up from history.
+- **Hydrate records** carry derived views, such as transcript or graph snapshots, anchored to an authority cursor.
+- **Control messages** handle attach, heartbeat, and targeted client-tool execution outside the journal.
 
-```json
-{
-  "type": "interrupt.requested",
-  "protocolVersion": "narad/v1",
-  "eventId": "evt-2",
-  "timestamp": "2026-08-05T00:00:01Z",
-  "sessionId": "session-3",
-  "sessionSequence": 2,
-  "rootRunId": "run-3",
-  "runId": "run-3",
-  "sequence": 2,
-  "interruptId": "interrupt-1",
-  "waitId": "wait-1",
-  "kind": "approval",
-  "actions": ["approve", "deny"]
-}
+Session, workflow, and run-tree sequences keep ordering explicit. Stable event identities support duplicate delivery; reducers reject conflicting reuse. Timestamps provide context but do not decide authority order. Workflow choice events record the branch selected, while graph hydrate data remains a rebuildable projection and cannot override lifecycle facts.
+
+Profiles let hosts and clients agree on optional capabilities before profile events are sent. A client ignores profiles it did not negotiate and validates the profiles it claims to understand.
+
+The full contract—including lifecycle requirements, event fields, security boundaries, and conformance rules—is in [`narad-v1.md`](packages/narad-spec/narad-v1.md).
+
+## Install
+
+```sh
+npm i @devkrity/narad @devkrity/narad-react
 ```
 
-## Conformance
+Add `@devkrity/narad-spec` if your application needs the published schemas and conformance traces:
 
-[`packages/narad-spec/schema`](packages/narad-spec/schema) and [`packages/narad-spec/conformance`](packages/narad-spec/conformance) are the contract. The TypeScript client is asserted against those traces.
+```sh
+npm i @devkrity/narad-spec
+```
+
+## Validate this repository
 
 ```sh
 pnpm install
 pnpm verify
 ```
 
-`pnpm verify` is the release gate: spec validation, build, typecheck, tests, public `.d.ts` smoke, and dist import smoke. Do not commit `dist/`; `prepare` builds it on install.
+`pnpm verify` validates schemas and traces, builds and typechecks the packages, runs tests, then checks public declarations and built-package imports.
 
-## Consume from this repo
+## Learn more
 
-Packages are unpublished. Pin a git tag and a `path:` into the public monorepo at [github.com/devkrity/narad](https://github.com/devkrity/narad). `prepare` builds `dist/` on install. No GitHub token is required.
+- [Narad product spec sheet](packages/narad-spec/SPEC-SHEET.md)
+- [Normative Narad v1 protocol](packages/narad-spec/narad-v1.md)
+- [Core client package](packages/narad/README.md)
+- [React bindings](packages/narad-react/README.md)
+- [Conformance schemas and traces](packages/narad-spec)
 
-pnpm 11.5.2 will refuse the git `prepare` unless the consumer allowlists the packages (proven: `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`). Put this in the consumer `pnpm-workspace.yaml`:
-
-```yaml
-allowBuilds:
-  '@devkrity/narad': true
-  '@devkrity/narad-react': true
-  esbuild: true
-```
-
-Write the full specifier in `package.json`. `pnpm add` may drop `#tag&path:` from that file; the lockfile still stores the resolved commit and path.
-
-```json
-{
-  "dependencies": {
-    "@devkrity/narad": "git+https://github.com/devkrity/narad.git#v0.1.0-alpha.1&path:packages/narad",
-    "@devkrity/narad-react": "git+https://github.com/devkrity/narad.git#v0.1.0-alpha.1&path:packages/narad-react",
-    "@devkrity/narad-spec": "git+https://github.com/devkrity/narad.git#v0.1.0-alpha.1&path:packages/narad-spec"
-  }
-}
-```
-
-After `@devkrity` is reserved on npm, the same versions publish as `@devkrity/narad`, `@devkrity/narad-react`, and `@devkrity/narad-spec`.
-
-## Status
-
-Packages are `0.1.0-alpha.3`. This repo does not ship a server SDK, a Python SDK, or an AG-UI adapter. The shipped command client covers `resolve-interrupt`; `message` and `stop-active-root` are host-defined bindings ([§2.2](packages/narad-spec/narad-v1.md#22-command-catalog)). Spec prose, schemas, and traces live in `@devkrity/narad-spec`; the TypeScript client and React bindings consume them.
-
-## Host
-
-Narad was extracted from Kautuka, a local-first agent appliance that hosts it. Kautuka is a host, not a Narad server package.
-
-## License
-
-MIT. See [LICENSE](./LICENSE).
+Narad was extracted from Kautuka, which hosts the protocol in a local-first agent appliance. Kautuka is one host for Narad; its runtime and server implementation are maintained separately.

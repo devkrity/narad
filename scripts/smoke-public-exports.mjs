@@ -1,9 +1,23 @@
 #!/usr/bin/env node
+import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const packagesRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../packages');
+const naradRequire = createRequire(resolve(packagesRoot, 'narad/package.json'));
+
+try {
+  const specSheetPath = naradRequire.resolve('@devkrity/narad-spec/SPEC-SHEET.md');
+  if (specSheetPath !== resolve(packagesRoot, 'narad-spec/SPEC-SHEET.md')) {
+    throw new Error(`Unexpected spec sheet path: ${specSheetPath}`);
+  }
+  console.log('✓ @devkrity/narad-spec/SPEC-SHEET.md package export OK');
+} catch (error) {
+  console.error('✗ @devkrity/narad-spec/SPEC-SHEET.md package export FAILED');
+  console.error(error);
+  process.exitCode = 1;
+}
 
 const exportsToSmoke = [
   {
