@@ -1,6 +1,6 @@
 {
   "name": "@devkrity/narad",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0",
   "description": "Framework-neutral Narad client: reducer, replay, transport, and targeted execution.",
   "license": "MIT",
   "publishConfig": {
@@ -8,7 +8,6 @@
   },
   "type": "module",
   "sideEffects": false,
-  "releaseStatus": "alpha",
   "repository": {
     "type": "git",
     "url": "https://github.com/devkrity/narad",

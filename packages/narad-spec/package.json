@@ -1,6 +1,6 @@
 {
   "name": "@devkrity/narad-spec",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0",
   "description": "Narad protocol spec: JSON Schema, conformance traces, and prose.",
   "homepage": "https://github.com/devkrity/narad#readme",
   "bugs": {

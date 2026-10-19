@@ -1,6 +1,6 @@
 {
   "name": "@devkrity/narad-react",
-  "version": "0.1.0-alpha.4",
+  "version": "0.1.0",
   "description": "React bindings for @devkrity/narad — provider and useSyncExternalStore hooks only.",
   "license": "MIT",
   "publishConfig": {
@@ -8,7 +8,6 @@
   },
   "type": "module",
   "sideEffects": false,
-  "releaseStatus": "alpha",
   "repository": {
     "type": "git",
     "url": "https://github.com/devkrity/narad",
@@ -40,7 +39,7 @@
     "test:run": "vitest run"
   },
   "peerDependencies": {
-    "@devkrity/narad": "^0.1.0-alpha.4",
+    "@devkrity/narad": "^0.1.0",
     "react": ">=18"
   },
   "devDependencies": {

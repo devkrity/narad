@@ -8,7 +8,7 @@ For tool approvals, Narad keeps the decision tied to the tool call it governs an
 
 Wire protocol: `narad/v1` · Say *NAH-rud* · Spell **Narad**, never Narada.
 
-Next release: `0.1.0-alpha.4` · Development: Node 22+ and pnpm 11.5.2 · MIT
+Version: `0.1.0` · Development: Node 22+ and pnpm 11.5.2 · MIT
 
 [Read the product spec sheet](packages/narad-spec/SPEC-SHEET.md) · [Read the normative protocol](packages/narad-spec/narad-v1.md)
 
@@ -80,7 +80,7 @@ Consider Narad when at least two of these are true:
 | [`@devkrity/narad`](packages/narad) | Framework-neutral validation, reducers, replay, SSE parsing, attach/recovery coordination, commands, and client tool execution. |
 | [`@devkrity/narad-react`](packages/narad-react) | React provider and selector hooks over an existing Narad client store. |
 
-The package manifests target `0.1.0-alpha.4`. This repository provides the protocol contract and client-side libraries. A host supplies its durable journal and storage, authorization, transport endpoints, command handling, scheduler, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
+The package manifests are versioned `0.1.0`. This repository provides the protocol contract and client-side libraries. A host supplies its durable journal and storage, authorization, transport endpoints, command handling, scheduler, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
 
 ## Get started
 
