@@ -1,4 +1,6 @@
-# Narad
+# Narad Protocol
+
+[![npm](https://img.shields.io/npm/v/@devkrity/narad)](https://www.npmjs.com/package/@devkrity/narad) [![CI](https://github.com/devkrity/narad/actions/workflows/ci.yml/badge.svg)](https://github.com/devkrity/narad/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Make agent work recoverable, inspectable, and safe to supervise.**
 
@@ -171,8 +173,12 @@ pnpm verify
 
 `pnpm verify` validates schemas and traces, builds and typechecks the packages, runs tests, then checks public declarations and built-package imports.
 
+Kautuka is the reference host application: [devkrity/kautuka](https://github.com/devkrity/kautuka).
+
 ## Learn more
 
+- [Contributor architecture overview](ARCHITECTURE.md)
+- [Runnable host and client example](examples/README.md)
 - [Narad product spec sheet](packages/narad-spec/SPEC-SHEET.md)
 - [Normative Narad v1 protocol](packages/narad-spec/narad-v1.md)
 - [Core client package](packages/narad/README.md)
