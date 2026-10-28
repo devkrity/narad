@@ -2,9 +2,11 @@
 
 [![npm](https://img.shields.io/npm/v/@devkrity/narad)](https://www.npmjs.com/package/@devkrity/narad) [![CI](https://github.com/devkrity/narad/actions/workflows/ci.yml/badge.svg)](https://github.com/devkrity/narad/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+Narad Protocol is an open, MIT-licensed protocol for how an AI-agent host talks to all its apps (web, terminal, chat). It covers agents that start other agents, multi-step workflows, pauses for a person to approve something, and tools that run on the user's side using single-use permission tokens. Apps send requests and check what the host tells them against strict rules, so every app stays in step with the host. It ships as a spec plus small TypeScript and React libraries (`@devkrity/narad*`). [Kautuka](https://github.com/devkrity/kautuka) is the reference app that uses it.
+
 **Make agent work recoverable, inspectable, and safe to supervise.**
 
-Narad is a journal-first protocol and TypeScript client toolkit for durable agent sessions. It gives a host one ordered account of what happened across workflows, nested runs, tool calls, human decisions, conversation, and generated outputs. Clients can rebuild their view from that account after a refresh or disconnect, while the host remains in control of execution and durable writes.
+Narad defines how a host and its apps exchange agent, workflow, approval, and client-tool state. TypeScript and React libraries help apps validate host updates and stay aligned across refreshes and reconnects, while the host remains in control of execution and durable writes.
 
 For tool approvals, Narad keeps the decision tied to the tool call it governs and records the outcome in the journal, so replay shows what was approved and how the run continued.
 
@@ -28,14 +30,14 @@ Workflow: prepare a release
   ├─ Run resumes and completes
   └─ Workflow records the selected next step
 
-Authority journal → replayable state → React UI, workspace view, or custom client
+Host updates → consistent client state → React UI, workspace view, or custom client
 ```
 
 Narad keeps **what happened**, **what someone asked to happen**, and **what may execute on a client** as distinct things:
 
-- The backend appends authority events. Clients reduce and replay them; they never append facts to the journal.
-- Commands carry intent, such as resolving an interrupt. The host accepts or rejects that intent, and accepted outcomes appear in the journal.
-- Side-effecting client tools execute only from a targeted control message with a lease and execution token. Seeing a historical `tool.call.started` event never runs the tool.
+- The host is authoritative for agent, workflow, and approval state. Apps validate updates and display that state; they cannot write host facts directly.
+- Commands carry intent, such as resolving an interrupt. The host accepts or rejects the request and sends the resulting state to its apps.
+- Side-effecting client tools execute only from a targeted control message with a lease and execution token. A previously received update never grants permission to execute a tool.
 
 ## Capabilities
 
@@ -54,15 +56,15 @@ Human decisions are first-class lifecycle facts. One run may have one open block
 
 For the protocol-defined feature set, package boundaries, and implementation map, see the [spec sheet](packages/narad-spec/SPEC-SHEET.md).
 
-## What breaks without a durable journal
+## Why hosts use Narad
 
-**A refresh can lose the run.** A stream-only UI knows only the frames it happened to receive. Narad lets a client rebuild from the ordered journal, merge live delivery with history, and catch up after sequence gaps.
+**A refresh can lose the current view.** A stream-only UI knows only the updates it happened to receive. Narad lets an app reconnect, request missed host state, and catch up after sequence gaps.
 
-**Replay can repeat side effects.** Narad treats history as observation: a recorded tool-call event does not execute a tool. Client-side execution requires a targeted control message with a lease and one-shot execution token, so recovery does not turn replay into permission to act again.
+**A reconnect must not repeat side effects.** Previously received tool updates do not execute a tool. Client-side execution requires a targeted control message with a lease and one-shot execution token, keeping permission separate from ordinary state updates.
 
 ## Where Narad fits
 
-[MCP](https://modelcontextprotocol.io/) connects agents with tools; [A2A](https://a2a-protocol.org/) supports agent-to-agent communication; [AG-UI](https://docs.ag-ui.com/introduction) streams agent activity to user interfaces. Narad complements these by defining the ordered, replayable lifecycle journal behind durable sessions: what ran, what paused for a human decision, what was delegated, and how work resumed. That journal can support multiple clients and UI surfaces over the lifetime of a run.
+[MCP](https://modelcontextprotocol.io/) connects agents with tools; [A2A](https://a2a-protocol.org/) supports agent-to-agent communication; [AG-UI](https://docs.ag-ui.com/introduction) streams agent activity to user interfaces. Narad defines how a host shares agent, workflow, approval, and client-tool state with its apps, so different clients can follow the same work and send requests through the same host authority.
 
 ## When Narad is useful
 
@@ -82,7 +84,7 @@ Consider Narad when at least two of these are true:
 | [`@devkrity/narad`](packages/narad) | Framework-neutral validation, reducers, replay, SSE parsing, attach/recovery coordination, commands, and client tool execution. |
 | [`@devkrity/narad-react`](packages/narad-react) | React provider and selector hooks over an existing Narad client store. |
 
-The package manifests are versioned `0.1.0`. This repository provides the protocol contract and client-side libraries. A host supplies its durable journal and storage, authorization, transport endpoints, command handling, scheduler, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
+The package manifests are versioned `0.1.0`. This repository provides the protocol contract and client-side libraries. A host supplies durable state and storage, authorization, transport endpoints, command handling, scheduling, and agent/tool policy. Narad is transport-neutral; SSE is one supported client transport helper, not a required server architecture.
 
 ## Get started
 
@@ -184,5 +186,5 @@ Kautuka is the reference host application: [devkrity/kautuka](https://github.com
 - [Core client package](packages/narad/README.md)
 - [React bindings](packages/narad-react/README.md)
 - [Conformance schemas and traces](packages/narad-spec)
-
-Narad was extracted from Kautuka, which hosts the protocol in a local-first agent appliance. Kautuka is one host for Narad; its runtime and server implementation are maintained separately.
+- [Contributing](CONTRIBUTING.md) — see contribution guidance and sign commits with `git commit -s`.
+- [Security policy](SECURITY.md)

@@ -1,4 +1,4 @@
-# Architecture and contributor overview
+# Narad Protocol — architecture and contributor overview
 
 ## Repository map
 
