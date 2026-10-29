@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@devkrity/narad-spec": "workspace:*",
-    "@types/node": "^22.15.0",
+    "@types/node": "^26.6.5",
     "@typescript/native": "npm:typescript@^7.0.2",
     "tsup": "^8.5.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
