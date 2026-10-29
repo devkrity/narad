@@ -20,7 +20,8 @@
     "verify:readme": "node ./packages/narad/verify-readme-example.mjs",
     "smoke": "node ./scripts/smoke-public-exports.mjs",
     "typecheck:smoke": "pnpm --filter @devkrity/narad exec tsc --project ../../smoke/tsconfig.json",
-    "verify": "pnpm spec:check && pnpm build && pnpm verify:readme && pnpm typecheck && pnpm test && pnpm typecheck:smoke && pnpm smoke"
+    "verify": "pnpm spec:check && pnpm build && pnpm verify:readme && pnpm typecheck && pnpm test && pnpm typecheck:smoke && pnpm smoke",
+    "setup": "pnpm install --frozen-lockfile"
   },
   "devDependencies": {
     "ajv": "^8.20.0",
