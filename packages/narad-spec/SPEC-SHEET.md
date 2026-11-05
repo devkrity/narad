@@ -13,8 +13,8 @@ Narad is designed for work that can pause, branch, delegate, run on another clie
 | **Protocol** | `narad/v1` |
 | **Approach** | Journal-first, transport-neutral, event-reduced |
 | **Packages** | Protocol spec, framework-neutral TypeScript client, React bindings |
-| **Current package version** | `0.1.0-alpha.3` |
-| **Specification status** | Release Candidate 1, as recorded in the normative protocol document |
+| **Current package version** | `0.1.0` |
+| **Specification status** | Published normative specification for `narad/v1` |
 | **License** | MIT |
 
 ## What you can build
@@ -119,4 +119,4 @@ This repository does not include a server SDK. A host supplies durable storage a
 - For the complete normative contract, read [`narad-v1.md`](./narad-v1.md).
 - For package exports and conformance material, see the [`@devkrity/narad-spec` package](./README.md).
 
-The wire name is `narad/v1`. The current normative document is marked Release Candidate 1; package versions are `0.1.0-alpha.3`.
+The wire name is `narad/v1`. The published normative document defines its event model, lifecycle rules, ordering, validation, replay, and conformance requirements. Package versions are `0.1.0`.

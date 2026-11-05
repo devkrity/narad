@@ -87,7 +87,7 @@ describe('NaradProvider', () => {
 
 describe('useNaradSelector', () => {
   it('updates when the selected slice changes', () => {
-    const store = createTestStore('alpha');
+    const store = createTestStore('value-a');
     const values: string[] = [];
 
     render(
@@ -100,7 +100,7 @@ describe('useNaradSelector', () => {
       store.clearSessionGap();
     });
 
-    expect(values[values.length - 1]).toBe('alpha');
+    expect(values[values.length - 1]).toBe('value-a');
   });
 
   it('does not rerender when an unrelated snapshot field changes but selection is equal', () => {
