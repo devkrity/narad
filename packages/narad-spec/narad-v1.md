@@ -1,6 +1,6 @@
 # Agent Interaction Protocol (Narad)
 
-**Status:** 1.0 Release Candidate 1  
+**Status:** Published normative specification<br>
 **Protocol id:** `narad/v1`  
 **Wire naming:** `dotted.lowercase`  
 **Normative schemas:** [`schema/`](./schema/)  
@@ -745,4 +745,4 @@ A client conforms to a profile when it:
 
 Unknown protocol versions must be rejected. Unknown optional fields are ignored. Unknown event types from an active claimed profile fail closed unless that profile explicitly marks them ignorable.
 
-The JSON schemas define structural validity. The golden traces define lifecycle and replay behavior. Where prose, schema, and trace disagree during the release-candidate period, the conflict is a specification defect and must be resolved before the v1 freeze.
+The JSON schemas define structural validity. The golden traces define lifecycle and replay behavior. Any disagreement between prose, schema, and trace is a specification defect; resolve it consistently across all three so that implementations have one normative contract.
